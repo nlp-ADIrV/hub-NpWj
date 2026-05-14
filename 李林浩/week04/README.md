@@ -36,8 +36,6 @@ week04/
 pip install torch
 ```
 
-如果已经配置好 PyTorch 环境，可以直接运行代码。
-
 ---
 
 ## 运行方式
