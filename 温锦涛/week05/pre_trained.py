@@ -1,17 +1,37 @@
 """
-字符级语言模型训练脚本，支持 RNN / LSTM 切换，含 PPL 计算。
+字符级语言模型预训练脚本（Decoder-only Transformer，类 GPT 架构）。
+含正弦位置编码、PPL 计算、梯度裁剪、余弦退火学习率调度。
 用法:
-    python language_model.py --model lstm --epochs 20
-    python language_model.py --model rnn  --epochs 20
+    python pre_trained.py
 """
 
 import math
-import argparse
 import glob
+import os
 import random
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+
+
+# ──────────────────────── 位置编码 ─────────────────────────
+
+class PositionalEncoding(nn.Module):
+    """正弦位置编码 (Attention Is All You Need)."""
+    def __init__(self, d_model, max_len=5000, dropout=0.1):
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)  # (1, max_len, d_model)
+        self.register_buffer("pe", pe)
+
+    def forward(self, x):
+        x = x + self.pe[:, :x.size(1), :]
+        return self.dropout(x)
 
 
 # ─────────────────────────── 数据 ───────────────────────────
@@ -49,26 +69,27 @@ class CharDataset(Dataset):
 # ─────────────────────────── 模型 ───────────────────────────
 
 class LM(nn.Module):
-    def __init__(self, vocab_size, embed_dim, hidden_dim, num_encoder_layers, num_decoder_layers, dropout):
+    """Decoder-only Transformer 语言模型 (类 GPT)."""
+    def __init__(self, vocab_size, embed_dim, nhead, num_layers, dim_feedforward, dropout):
         super().__init__()
         self.embed = nn.Embedding(vocab_size, embed_dim)
-        nn.RNN
-        self.transformer = nn.Transformer(
-            embed_dim, hidden_dim,
-            num_encoder_layers=num_encoder_layers,
-            num_decoder_layers=num_decoder_layers,
+        self.pos_enc = PositionalEncoding(embed_dim, dropout=dropout)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embed_dim,
+            nhead=nhead,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout,
             batch_first=True,
-            dropout=dropout if num_encoder_layers > 1 else 0.0,
         )
-        self.drop = nn.Dropout(dropout)
+        self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         self.fc = nn.Linear(embed_dim, vocab_size)
 
     def forward(self, x):
-        e = self.drop(self.embed(x))
-        # out, _ = self.transformer(e)
-        tgt_mask = nn.Transformer.generate_square_subsequent_mask(x.size(1)).to(x.device)
-        out = self.transformer(e, e, tgt_mask=tgt_mask)
-        logits = self.fc(self.drop(out))   # (B, T, V)
+        e = self.embed(x)
+        e = self.pos_enc(e)
+        causal_mask = nn.Transformer.generate_square_subsequent_mask(x.size(1)).to(x.device)
+        out = self.encoder(e, mask=causal_mask)
+        logits = self.fc(out)
         return logits
 
 
@@ -87,6 +108,7 @@ def run_epoch(model, loader, criterion, optimizer, device, train=True):
         if train:
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 
         total_loss += loss.item() * y.numel()
@@ -101,28 +123,26 @@ def run_epoch(model, loader, criterion, optimizer, device, train=True):
 
 def main():
     args = {
-        "model": "transformer",
         "epochs": 20,
         "seq_len": 64,
         "batch_size": 128,
         "embed_dim": 128,
-        "hidden_dim": 8,
-        "num_encoder_layers": 2,
-        "num_decoder_layers": 2,
+        "nhead": 8,
+        "num_layers": 4,
+        "dim_feedforward": 512,
         "dropout": 0.3,
         "lr": 1e-3,
         "val_ratio": 0.05,
-        "corpus": "*.txt",
-        "save": "best_model.pt"
+        "corpus": os.path.join(os.path.dirname(os.path.abspath(__file__)), "corpus.txt"),
+        "save": os.path.join(os.path.dirname(os.path.abspath(__file__)), "best_model.pt"),
     }
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"device: {device}  model: {args['model'].upper()}")
+    print(f"device: {device}")
 
-    # 数据准备
     text = load_corpus(args["corpus"])
     if not text:
-        raise FileNotFoundError("未找到任何 .txt 文件，请确认路径正确。")
+        raise FileNotFoundError(f"未找到语料文件: {args['corpus']}")
     print(f"语料字符数: {len(text):,}")
 
     char2idx, idx2char = build_vocab(text)
@@ -145,9 +165,9 @@ def main():
     model = LM(
         vocab_size=vocab_size,
         embed_dim=args["embed_dim"],
-        hidden_dim=args["hidden_dim"],
-        num_encoder_layers=args["num_encoder_layers"],
-        num_decoder_layers=args["num_decoder_layers"],
+        nhead=args["nhead"],
+        num_layers=args["num_layers"],
+        dim_feedforward=args["dim_feedforward"],
         dropout=args["dropout"],
     ).to(device)
 
@@ -156,6 +176,7 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args["lr"])
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args["epochs"])
 
     best_val_ppl = float("inf")
 
@@ -178,6 +199,7 @@ def main():
             }, args["save"])
 
         print(f"{epoch:>6}  {tr_loss:>10.4f}  {tr_ppl:>10.2f}  {va_loss:>10.4f}  {va_ppl:>10.2f}{marker}")
+        scheduler.step()
 
     print(f"\n训练完成。最佳验证 PPL: {best_val_ppl:.2f}  已保存至 {args['save']}")
 
