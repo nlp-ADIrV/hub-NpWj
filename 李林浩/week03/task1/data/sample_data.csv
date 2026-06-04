@@ -1,0 +1,25 @@
+text,label
+这家酒店环境很好 服务也很周到,positive
+手机续航很强 屏幕显示清晰,positive
+这本书内容扎实 讲解清楚,positive
+物流速度很快 包装也完好,positive
+课程设计合理 老师讲得很好,positive
+产品质量不错 性价比很高,positive
+今天只是普通的一天 没有什么特别的事,neutral
+会议将在下午三点开始,neutral
+系统已经完成初始化 请等待下一步操作,neutral
+这是一条普通通知 请及时查看,neutral
+用户提交了新的表单数据,neutral
+文件已经上传到服务器目录,neutral
+这个软件经常崩溃 使用体验很差,negative
+外卖送得太慢 饭菜已经凉了,negative
+客服回复敷衍 没有解决问题,negative
+这个产品质量很差 完全不推荐,negative
+页面加载很慢 经常出现错误,negative
+说明文档混乱 很难理解,negative
+酒店房间很干净 前台态度也很好,positive
+这次购物体验非常满意,positive
+模型训练已经启动 日志会持续输出,neutral
+请在截止时间前提交材料,neutral
+手机发热严重 电池掉电很快,negative
+课程内容太浅 没有什么收获,negative
