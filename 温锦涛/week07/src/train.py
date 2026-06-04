@@ -28,7 +28,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
-from transformers import BertTokenizer, get_linear_schedule_with_warmup
+from transformers import AutoTokenizer, get_linear_schedule_with_warmup
 from tqdm import tqdm
 
 from dataset import build_label_schema, build_dataloaders
@@ -158,7 +158,7 @@ def main():
     print(f"BIO 标签数：{num_labels}（O + {len(labels) - 1} 个实体标签）")
 
     # Tokenizer
-    tokenizer = BertTokenizer.from_pretrained(str(args.bert_path))
+    tokenizer = AutoTokenizer.from_pretrained(str(args.bert_path), use_fast=True)
 
     # DataLoader
     train_loader, val_loader, _ = build_dataloaders(

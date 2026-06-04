@@ -25,7 +25,7 @@ from pathlib import Path
 from collections import defaultdict
 
 import torch
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 from seqeval.metrics import (
     f1_score, precision_score, recall_score,
     classification_report as seqeval_report,
@@ -143,7 +143,7 @@ def main():
     model.load_state_dict(ckpt["state_dict"])
     print(f"加载 checkpoint（epoch={ckpt['epoch']}，val_f1={ckpt['val_entity_f1']:.4f}）")
 
-    tokenizer = BertTokenizer.from_pretrained(str(args.bert_path))
+    tokenizer = AutoTokenizer.from_pretrained(str(args.bert_path), use_fast=True)
     _, val_loader, test_loader = build_dataloaders(
         tokenizer=tokenizer,
         label2id=label2id,

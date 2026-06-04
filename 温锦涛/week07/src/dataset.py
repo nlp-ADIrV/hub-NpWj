@@ -5,7 +5,7 @@ from typing import Optional
 
 import torch
 from torch.utils.data import Dataset, DataLoader
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 ROOT = Path(__file__).parent.parent
 DATA_DIR = ROOT / "data" / "peoples_daily"
@@ -31,7 +31,7 @@ class PeoplesDailyDataset(Dataset):
     def __init__(
         self,
         records: list,
-        tokenizer: BertTokenizer,
+        tokenizer: AutoTokenizer,
         label2id: dict,
         max_length: int = 128,
     ):
@@ -91,7 +91,7 @@ def load_records(split: str, data_dir: Optional[Path] = None) -> list:
 
 
 def build_dataloaders(
-    tokenizer: BertTokenizer,
+    tokenizer: AutoTokenizer,
     label2id: dict,
     batch_size: int = 32,
     max_length: int = 128,
