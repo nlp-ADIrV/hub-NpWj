@@ -1,0 +1,31 @@
+bert_ner/
+├─ data/                    # 自动生成数据集
+│  └─ cluener/              # 原始的train.json/validation.json/test.json
+├─ src/
+│   ├─ download_data.py     # 数据转换脚本
+│   ├─ explore_data.py      # 数据集探索分析（长度/实体/标签）
+│   ├─ dataset.py           # NER数据集加载
+│   ├─ model.py             # BertNER + BertCRFNER（双模型）
+│   ├─ train.py             # 训练脚本（分层LR/Warmup）
+│   ├─ evaluate.py          # 评估脚本（实体F1+非法序列统计）
+│   ├─ predict.py           # 单句推理抽取实体
+│   └─ compare_results.py   # Linear vs CRF 自动对比绘图
+├─ outputs/
+│   ├─ checkpoints/         # 模型保存
+│   ├─ logs/                # 训练/评估日志
+│   └─ fig/                 # 图表保存
+└─ requirements.txt
+
+脚本执行顺序
+# 1. 生成数据集
+python download_data.py
+# 2. 数据可视化分析
+python explore_data.py
+# 3. 训练 Linear + CRF 两个模型（核心训练步骤）
+python train.py
+# 4. 评估两个模型效果
+python evaluate.py
+# 5. 单句实体抽取测试
+python predict.py
+# 6. 生成模型对比图表
+python compare_results.py
