@@ -1,0 +1,12 @@
+{"sentence1": "今天上海天气如何", "sentence2": "上海今天是什么天气", "label": 1}
+{"sentence1": "机器学习怎么入门", "sentence2": "初学者如何学习机器学习", "label": 1}
+{"sentence1": "iPhone怎么截图", "sentence2": "苹果手机截屏方法", "label": 1}
+{"sentence1": "身份证丢失如何办理", "sentence2": "身份证丢了怎么补办", "label": 1}
+{"sentence1": "怎样提升英语口语", "sentence2": "英语口语提高方法", "label": 1}
+{"sentence1": "电脑蓝屏怎么解决", "sentence2": "电脑蓝屏了怎么办", "label": 1}
+{"sentence1": "怎么退高铁票", "sentence2": "番茄炒蛋怎么做", "label": 0}
+{"sentence1": "猫不吃饭怎么办", "sentence2": "Python如何安装", "label": 0}
+{"sentence1": "论文查重怎么降", "sentence2": "北京旅游景点有哪些", "label": 0}
+{"sentence1": "手机充电很慢", "sentence2": "研究生复试内容", "label": 0}
+{"sentence1": "孩子发烧怎么办", "sentence2": "电脑运行慢怎么清理", "label": 0}
+{"sentence1": "北京到上海多久", "sentence2": "英语六级作文模板", "label": 0}
