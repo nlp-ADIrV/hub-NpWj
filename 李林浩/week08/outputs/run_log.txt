@@ -1,0 +1,14 @@
+$ python src/run_baselines.py --data_dirs data/bq_corpus_sample data/lcqmc_sample --split validation --output_dir outputs
+
+实验结果汇总：
+dataset	method	accuracy	precision	recall	f1
+bq_corpus_sample	char_jaccard	0.9167	0.8571	1.0000	0.9231
+bq_corpus_sample	char_bigram_jaccard	0.8333	1.0000	0.6667	0.8000
+bq_corpus_sample	tfidf_logreg	0.8333	0.8333	0.8333	0.8333
+bq_corpus_sample	tfidf_svm	0.8333	0.8333	0.8333	0.8333
+lcqmc_sample	char_jaccard	0.9167	1.0000	0.8333	0.9091
+lcqmc_sample	char_bigram_jaccard	0.9167	1.0000	0.8333	0.9091
+lcqmc_sample	tfidf_logreg	0.6667	0.6000	1.0000	0.7500
+lcqmc_sample	tfidf_svm	0.6667	0.6000	1.0000	0.7500
+
+已保存：outputs/results_summary.csv
