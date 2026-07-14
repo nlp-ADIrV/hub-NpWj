@@ -1,0 +1,24 @@
+2026-06-07 12:16:39,587 | 开始训练模型：linear
+2026-06-07 12:16:39,875 | linear Epoch 1 | Avg Loss: 1.0804
+2026-06-07 12:16:40,264 | linear Epoch 2 | Avg Loss: 1.0347
+2026-06-07 12:16:40,515 | linear Epoch 3 | Avg Loss: 1.0035
+2026-06-07 12:16:40,740 | linear Epoch 4 | Avg Loss: 0.9607
+2026-06-07 12:16:40,934 | linear Epoch 5 | Avg Loss: 0.9312
+2026-06-07 12:16:41,134 | linear Epoch 6 | Avg Loss: 0.8835
+2026-06-07 12:16:41,332 | linear Epoch 7 | Avg Loss: 0.8423
+2026-06-07 12:16:41,525 | linear Epoch 8 | Avg Loss: 0.7951
+2026-06-07 12:16:41,723 | linear Epoch 9 | Avg Loss: 0.7866
+2026-06-07 12:16:41,930 | linear Epoch 10 | Avg Loss: 0.7431
+2026-06-07 12:16:42,040 | linear 训练完成
+2026-06-07 12:16:42,174 | 开始训练模型：crf
+2026-06-07 12:16:42,403 | crf Epoch 1 | Avg Loss: 1.3824
+2026-06-07 12:16:42,606 | crf Epoch 2 | Avg Loss: 1.3273
+2026-06-07 12:16:42,806 | crf Epoch 3 | Avg Loss: 1.2756
+2026-06-07 12:16:43,000 | crf Epoch 4 | Avg Loss: 1.2371
+2026-06-07 12:16:43,194 | crf Epoch 5 | Avg Loss: 1.1839
+2026-06-07 12:16:43,400 | crf Epoch 6 | Avg Loss: 1.1547
+2026-06-07 12:16:43,617 | crf Epoch 7 | Avg Loss: 1.0988
+2026-06-07 12:16:43,813 | crf Epoch 8 | Avg Loss: 1.0517
+2026-06-07 12:16:44,013 | crf Epoch 9 | Avg Loss: 1.0076
+2026-06-07 12:16:44,223 | crf Epoch 10 | Avg Loss: 0.9732
+2026-06-07 12:16:44,331 | crf 训练完成

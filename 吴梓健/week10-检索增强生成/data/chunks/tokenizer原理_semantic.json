@@ -1,0 +1,380 @@
+[
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\n从文字到数字\n\n模型只能处理数字，文本必须先经过 Tokenizer 转化为 Token ID 序列。\n\n原始文本\n\n\"Hello, world!\"\n\nTokenizer\n\n切分 + 编码\n\nToken IDs\n\n[15496, 995, 0]\n\nEmbedding\n\n向量查表\n\n语言模型\n\nTransformer\n\n为什么不直接用字符？\n\n序列过长，英文 100 词约 500+ 字符，计算代价极高\n\n为什么不直接用单词？\n\n词表爆炸（数十万词），未登录词 UNK 问题严重\n\n子词是折中方案\n\n词表大小可控（30k~100k），覆盖率高，保留语义信息\n\nTokenizer 影响模型能力\n\n分词质量直接影响困惑度和下游任务效果\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 2,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00000"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\n三种切分粒度对比\n\n示例词汇：\"unhappiness\"\n\n字符级（Character）\n\nu n h a p p i n e s s\n\n11 tokens\n\n• 词表极小（约 100）\n\n• 无 UNK 问题\n\n• 序列极长，训练慢\n\n• 字符本身无语义\n\n词级（Word）\n\nunhappiness\n\n1 token\n\n• 单元有完整语义\n\n• 序列最短\n\n• 词表巨大（50 万+）\n\n• 新词 -> UNK\n\n子词级（Subword）\n\nun  |  happiness\n\n2 tokens\n\n• 词表适中（30k~100k）\n\n• 覆盖率高，稀有词可拆分\n\n• 需要训练词表\n\n• 多语种公平性有挑战\n\n现代 LLM 均采用子词级分词，在词表大小、序列长度、覆盖率之间取得最佳平衡。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 3,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00001"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\nUNK 问题的本质\n\n词级分词的困境\n\n拼写错误\n\n\"recieve\" → [UNK]\n\n训练集中从未出现\n\n专有名词\n\n\"ChatGPT\" → [UNK]\n\n新产品、人名地名层出不穷\n\n形态变化\n\n\"unhappiest\" → [UNK]\n\n词根词缀组合数量庞大\n\n多语言混合\n\n\"cafe\" → [UNK]\n\n特殊字符或非英语词汇\n\nUNK 的危害\n\n信息损失：未登录词共享同一向量，语义混淆\n\n训练困难：UNK 梯度无法回传到具体词汇\n\n生成错误：解码时 UNK 出现破坏文本连贯\n\n语言不公平：低资源语言 UNK 率远高英语\n\n目标：构建分词方案，使得任意文本均可表示，无需 UNK\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 4,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00002"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\n理想 Tokenizer 的三个目标\n\n零 UNK 覆盖率\n\n任意输入文本均可被无损表示，不出现 [UNK] 标记。\n这要求词表在底层具备完备性——字节级方案是最彻底的实现路径。\n\n高压缩率\n\n相同语义内容用尽可能少的 token 表达。\ntoken 数越少，上下文利用率越高，推理越快，长文本支持越好。\n\n多语言公平性\n\n各语言的 token fertility（词/token 比）应均衡。\n不应让英语 1 token 对应一个词，其他语言却需 4~6 个 token。\n\n接下来：BPE -> BBPE -> WordPiece -> SentencePiece，逐步看各方案如何满足这三个目标\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 5,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00003"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 的起源\n\n从数据压缩到 NLP\n\n1994\n\nBPE 由 Philip Gage 提出\n\n用于无损数据压缩，核心思想：反复合并最高频字节对\n\n2015\n\nSennrich 等引入 NLP\n\n论文《Neural Machine Translation of Rare Words with Subword Units》\n\n2018\n\nGPT / GPT-2 采用\n\nOpenAI 使用 BPE 构建 40k/50k 词表，成为主流方案\n\n2020+\n\n几乎所有大模型沿用\n\nLLaMA / Qwen / Gemma 等均基于 BPE 或其变体\n\n压缩思想迁移到分词\n\n数据压缩中的 BPE：\n\n将最频繁出现的字节对替换为新符号，\n减少数据体积。\n\nNLP 中的迁移：\n\n将最频繁出现的字符对合并为子词单元，\n扩大词表覆盖范围。\n\n核心洞察：\n\n高频共现的字符序列往往携带语义信息\n（如 ing / un / tion 等词缀）。\n\nBPE = 用频次驱动的贪心合并，从字符出发逐步构建子词词表\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 7,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00004"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 算法步骤\n\n初始化词表\n\n将语料中每个词拆成字符序列，末尾加 </w>（词尾标记）\n收集所有字符作为初始词表\n\n统计频次\n\n遍历语料，统计所有相邻符号对（bigram）的出现次数\n\n合并最高频对\n\n找出频次最高的符号对 (a, b)，将所有 a b 合并为 ab\n将 ab 加入词表\n\n迭代直到目标词表大小\n\n重复步骤 2-3，每次迭代合并一个新子词单元\n通常执行 10k~40k 次合并\n\nvocab = char_split(corpus)\nmerges = []\nfor i in range(num_merges):\n  pairs = count_pairs(vocab)\n  best = max(pairs, key=pairs.get)\n  vocab = merge_pair(vocab, best)\n  merges.append(best)\n# apply merges in order on new text\n\n合并规则按学习顺序应用：先合并的规则优先级更高\n\n关键参数：num_merges（合并次数）= 词表大小 - 初始字符数\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 8,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00005"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\n词表构建演示\n\n语料：\"low low low low low lower lower newest newest widest\"\n\n合并轮次\n\n最高频对\n\n合并后新单元\n\n词表变化\n\n初始状态\n\nl, o, w, e, r, n ...\n\n第 1 次\n\n(e, s)\n\nes 加入词表\n\n第 2 次\n\n(es, t)\n\nest\n\nest 加入词表\n\n第 3 次\n\n(lo, w)\n\nlow\n\nlow 加入词表\n\n第 4 次\n\n(low, </w>)\n\nlow</w>\n\nlow</w> 加入\n\n第 5 次\n\n(n, e)\n\nne 加入词表\n\n经过 N 次合并后，原本未登录的词可被拆为已知子词：widest -> wide + st（而非 UNK）\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 9,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00006"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 如何减少 UNK\n\n新词拆解示例\n\ntokenization\n\ntoken | ization\n\n常见子词组合\n\nChatGPT\n\nChat | G | PT\n\n部分子词已知\n\nunhappiest\n\nun | happi | est\n\n词缀均已知\n\nxyzabc123\n\nxy | z | ab | c1\n\n字符级退化\n\nUNK 率对比\n\n新闻语料 OOV 率（估算）\n\n词级（50k）\n\n3.2%\n\nBPE 30k\n\n0.04%\n\nBPE 50k\n\n0.01%\n\n词级分词约 3% OOV（百万词量规模），\nBPE 可将其降至 <0.05%，几乎消灭 UNK。\n\nBPE 的兜底：任意词在最坏情况下被拆回单个字符，词表仍能覆盖\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 10,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00007"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 的局限性\n\n贪心合并，非全局最优\n\n每次只选频次最高的一对，可能错过更优的子词边界。\n同一个词在不同上下文可能被切分为不同子词。\n\nlower → low+er  OR  lo+wer\n\n跨语言词表不均衡\n\n在英语语料上训练的 BPE，中文/日文等非拉丁语系\n需要更多 token 表达相同信息（fertility 问题）。\n\n\"nihao\" → [ni, ha, o]  # 3 tokens\n\n仍有极少量 UNK\n\n字符级 BPE 依赖字符集，如果训练语料缺少某些\nUnicode 字符，仍会出现 UNK。\n\n\"rare_char\" → [UNK]\n\n解决方案：BBPE（字节级 BPE）从根源消灭 UNK——下一部分介绍\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 11,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00008"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nGPT-2 中的 BPE 实践\n\nGPT-2 Tokenizer 设计决策\n\n词表大小：\n\n50,257（含 256 字节 + BPE 合并 + <|endoftext|>）\n\n初始词表：\n\n所有 UTF-8 字节（256 个），确保任意文本均可编码\n\n空格处理：\n\n将空格归入后续词（如 ' hello' 不同于 'hello'）\n\n标点规则：\n\n标点单独成词，不与前后字符合并\n\n合并次数：\n\n约 50,000 次合并迭代\n\n实际效果示例\n\nimport tiktoken\nenc = tiktoken.get_encoding(\"gpt2\")\n\n# 'Hello, world!'\nenc.encode(\"Hello, world!\")\n# [15496, 11, 995, 0]\n\n# 4 tokens for 3 words\nenc.encode(\"tokenization\")\n# [30001, 1634, 341]  # 3 tokens\n\n压缩率对比（英文）：\n\n字符级：~4.5 chars/token\n\nGPT-2 BPE：~4.0 chars/token\n\nGPT-4 BPE：~4.5 chars/token\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 12,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00009"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\n从字符到字节：为什么需要 BBPE？\n\n字符级 BPE 的根本问题\n\nUnicode 覆盖不完全\n\nUnicode 有 140,000+ 字符，任何训练语料\n都不可能覆盖全部，边缘字符仍出现 UNK。\n\n词表大小爆炸\n\n多语言模型若要覆盖所有脚本的字符，\n初始字符词表可达数千，难以管理。\n\n新表情 / 特殊符号\n\n新 emoji、数学符号、古文字等在训练时\n不存在，部署后遇到即产生 UNK。\n\n字节级的根本解法\n\n任何文本 = UTF-8 字节序列\n256 个字节值覆盖所有可能输入\n\nUTF-8 编码示意\n\n# 'A'  → 0x41        (1 byte)\n# 'e'  → 0xC3 0xA9   (2 bytes)\n# '中' → 0xE4 0xB8 0xAD  (3B)\n# emoji → 0xF0...    (4 bytes)\n# ALL text: 256 byte values\n\nBBPE 将这 256 个字节作为初始词表，\n之后的 BPE 合并步骤与原版完全相同。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 14,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00010"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\nBBPE 核心思路：256 字节作为初始词表\n\nBPE vs BBPE 对比\n\n对比维度\n\nBPE（字符级）\n\nBBPE（字节级）\n\n初始词表\n\n所有字符（语言相关）\n\n256 字节值（语言无关）\n\n覆盖范围\n\n训练语料中出现的字符\n\n所有 UTF-8 文本（无例外）\n\nUNK 风险\n\n有（罕见字符/新符号）\n\n零 UNK（理论保证）\n\n初始词表大小\n\n数十到数百\n\n恒定 256\n\n多语言支持\n\n需要语言特定字符\n\n统一字节空间，天然支持\n\nBBPE 是 BPE 的最小改动版本：只替换初始词表，算法本身不变\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 15,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00011"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\n多语言支持原理\n\n同一字节空间统一不同语言\n\n无论文字属于哪种语言，BBPE 均通过相同的\n256 字节值域进行表示，无需分别处理。\n\nEnglish\n\nhello →\n\n68 65 6C 6C 6F\n\n(5 bytes)\n\nChinese\n\n你好 →\n\nE4 BD A0 E5 A5 BD\n\n(6 bytes)\n\nArabic\n\nمرحبا →\n\nD9 85 D8 B1 ...\n\n(10 bytes)\n\nEmoji\n\nHello! →\n\nF0 9F 91 4B\n\n(4 bytes)\n\nBPE 合并后的跨语言共享\n\n高频字节序列在多种语言中共享合并规则：\n\nC3 A9 → e(accent)\n\n法语、西班牙语重音字母\n\nE4 B8 → 东亚字符前缀\n\n汉字、日文共享字节前缀\n\n20 → 空格(0x20)\n\n所有使用空格的语言共享\n\nBBPE 的合并规则天然跨语言共享——同一字节序列无论属于哪种语言均适用\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 16,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00012"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\nBBPE 与 BPE 的算法差异\n\nBPE 流程\n\n# Step 0: 初始化（字符级）\nvocab = {'l','o','w','e','r',...}\n\n# Step 1: 统计字符对频次\npairs = count_pairs(vocab)\n\n# Step 2: 合并最高频对\nbest = max(pairs, key=pairs.get)\nvocab = merge(vocab, best)\n\n初始词表依赖语言字符集\n\nBBPE 流程\n\n# Step 0: 初始化（字节级）\nvocab = {0x00, 0x01, ..., 0xFF}\n# 256 个字节，语言无关\n\n# Step 1-2: 完全相同\npairs = count_pairs(vocab)\nbest = max(pairs, key=pairs.get)\nvocab = merge(vocab, best)\n\n256 字节，语言无关，零 UNK\n\nBBPE = BPE with byte vocabulary  ·  仅 Step 0 不同，其余完全一致\n\nGPT-2 / LLaMA / Qwen 均使用 BBPE 或其改进版，词表基础为字节级。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 17,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00013"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\nBBPE 的代价与权衡\n\n零 UNK 的代价\n\n序列变长\n\n字节级初始表示比字符级更细粒度，即使相同\n文本也需要更多 token（低资源语言尤其明显）。\n\n\"中\" → 3 bytes → 最终可能 1~2 tokens\n\n低资源语言 fertility 偏高\n\n训练数据以英文为主时，中文/阿拉伯文的字节序列\n合并次数少，每个词对应更多 tokens。\n\n英文约 1.3 char/token，中文约 2~3 bytes/token\n\n学习成本上升\n\n模型需要从字节序列中自行学习字符边界，\n对语言结构的理解依赖更多训练数据。\n\nLLaMA-1 vs Qwen: 中文 token 效率相差 3x\n\n缓解策略\n\n扩大词表\n\n增大 num_merges，使高频字节序列都有对应 token。Qwen 词表达 150k+，中文效率大幅提升。\n\n多语言语料平衡\n\n训练时提高非英文语料比例（upsampling），让模型充分学习各语言字节合并模式。\n\n专用子词扩展\n\n在 BBPE 基础上为目标语言追加高频字词（如汉字直接加词表），兼顾效率与覆盖。\n\nBBPE 以轻微效率损失换取完整语言覆盖，是目前主流大模型的首选\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 18,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00014"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\nWordPiece（BERT 使用）\n\n与 BPE 的关键区别\n\nBPE 按频次贪心合并；WordPiece 按语言模型\n似然（likelihood）最大化来选择合并对。\n\nscore(a,b) = freq(ab) / (freq(a) * freq(b))\n\n分子越大（ab 常见），分母越小（a、b 单独罕见），\n说明合并这对更能减少不确定性。\n\n连续子词前缀：\n\n## 标记非词首子词（##ing, ##tion）\n\n分词方向：\n\n从左到右，找词表中最长匹配\n\n代表模型：\n\nBERT / DistilBERT / ELECTRA / XLM\n\n词表大小：\n\n典型 30k（BERT-base：30,522）\n\n分词示例\n\n# BERT WordPiece 示例\nfrom transformers import BertTokenizer\ntok = BertTokenizer.from_pretrained(\n  'bert-base-uncased')\n\ntok.tokenize('unaffable')\n# ['un', '##affect', '##able']\n\ntok.tokenize('tokenization')\n# ['token', '##ization']\n\n## 前缀区分词首/非词首子词，有助于还原词边界。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 20,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00015"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\nSentencePiece：语言无关的统一框架\n\n核心设计思路\n\n传统方案的隐含依赖\n\nBPE / WordPiece 需要先按空格/标点预切分文本（预分词步骤），这一步依赖语言规则：中文无空格，阿拉伯文规则各异，无法跨语言直接复用。\n\n中文 \"人工智能\" → 无空格 → BPE 无法预分词\n英文 \"hello world\" → 有空格 → BPE 可处理\n\nSentencePiece 的解法\n\n把空格替换为特殊字符 ▁（U+2581），文本变成纯字符流。算法直接在原始 Unicode 上运行，不需要任何语言特定预处理。\n\n\"Hello world\" → ▁Hello  ▁world → 子词序列\n\n框架结构：算法可选\n\n内嵌 BPE\n\n频次驱动合并\nGPT / LLaMA 风格\n\n内嵌 Unigram\n\n概率化剪枝\nT5 / mT5 风格\n\nimport sentencepiece as spm\nspm.SentencePieceTrainer.train(\n  input='corpus.txt',\n  model_prefix='spm',\n  vocab_size=32000,\n  model_type='bpe')\n\n采用 SentencePiece 的代表模型：\n\nLLaMA 1/2/3：SentencePiece + BPE\n\nT5 / mT5：SentencePiece + Unigram\n\nALBERT：SentencePiece + Unigram\n\nSentencePiece = 把空格变成字符 ▁  →  文本成为字符流  →  彻底消除语言预处理依赖\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 21,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00016"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\nUnigram Language Model 分词\n\n与 BPE 的逆向思路\n\nBPE 从小词表出发，不断合并（自下而上）\nUnigram 从大词表出发，不断剪枝（自上而下）\n\n初始化大词表\n\n收集语料中所有子串（字符/子词），初始词表可达 20万+\n\n计算子词概率\n\n用 EM 算法估计每个子词的 unigram 概率 P(x)\n\n剪枝低价值子词\n\n移除对语料 log-likelihood 影响最小的子词\n\n迭代至目标词表\n\n重复步骤 2-3，直到词表缩减到目标大小（如 32k）\n\nUnigram 的核心优势\n\n概率化分词路径\n\n同一词可有多种合法切分，模型输出每种切分\n的概率，训练时可采样多种切分增强鲁棒性。\n\n更平滑的词表覆盖\n\n剪枝基于统计显著性，保留真正高频的子词，\n词表质量优于 BPE 的贪心合并。\n\n分词歧义建模\n\nUnigram 可量化分词歧义程度，有助于处理\n形态复杂语言（芬兰语、土耳其语等）。\n\nUnigram 在 SentencePiece 框架下使用，代表模型：T5 / mT5 / ALBERT\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 22,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00017"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\n四种方案横向对比\n\n对比维度\n\nBPE\n\nBBPE\n\nWordPiece\n\nUnigram\n\n初始词表\n\n256 字节\n\n大词表剪枝\n\n合并策略\n\n频次最大\n\n频次最大\n\n似然最大\n\nEM + 剪枝\n\nUNK 风险\n\n零 UNK\n\n分词确定性\n\n可概率化\n\n多语言友好\n\n代表模型\n\nGPT-2\n\nLLaMA\n\nBERT\n\n没有绝对最优：选择取决于目标语言、词表大小要求和下游任务\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 23,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00018"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\n主流 LLM 使用的 Tokenizer\n\nGPT-4 / GPT-3.5\n\n分词器：BBPE (cl100k_base)\n\n词表：100,256  |  英文优化\n\nLLaMA 2/3\n\n分词器：SentencePiece + BPE\n\n词表：32,000  |  多语言\n\nQwen 2.5\n\n分词器：BBPE (tiktoken)\n\n词表：151,936  |  中英优化\n\nBERT / RoBERTa\n\n分词器：WordPiece\n\n词表：30,522  |  英文为主\n\nT5 / mT5\n\n分词器：SentencePiece + Unigram\n\n词表：32,128  |  101 语言\n\nGemma 2\n\n分词器：SentencePiece + BPE\n\n词表：256,000  |  多语言\n\n趋势：词表向 100k~256k 扩大 + BBPE 主导 + 多语言均衡\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 24,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00019"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\nToken Fertility：不同语言的效率差异\n\nFertility = 一个自然语言词汇需要多少个 token 来表示\n\nGPT-3.5 词表下各语言 Fertility 估算（越低越好）\n\nEnglish\n\n1.2x\n\nGerman\n\n1.5x\n\n形态变化多\n\nChinese\n\n2.5x\n\n英文词表训练\n\nArabic\n\n3.1x\n\n形态复杂\n\nJapanese\n\n2.8x\n\n混合字符系统\n\nFertility 越高 = 相同语义需要更多 token = 上下文利用率更低 = 推理成本更高\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 26,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00020"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\n词表平衡策略\n\n多语言语料采样（Upsampling）\n\n训练 tokenizer 时按语言比例采样，提高低资源\n语言在语料中的权重，使其字节/子词模式被充分合并。\n\nmBERT: 104 语言，低资源语言 upsampling 50x\n\n扩大词表（Large Vocab）\n\n增加 BPE/BBPE 合并次数，将更多高频子词单元\n纳入词表，降低各语言 fertility。\n\nQwen: 151,936  |  Gemma: 256,000\n\n语言特定词表扩展\n\n在预训练词表基础上追加目标语言高频词汇，\n专为特定语言提升效率，无需重新训练整个词表。\n\nLLaMA-2 Chinese: 追加 20k 汉字 token\n\n分层词表（Hierarchical）\n\n为不同脚本系统维护独立子词表，按语言路由\ntoken，解决不同脚本体系间的冲突。\n\n研究阶段，尚未广泛部署\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 27,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00021"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\n中文分词的特殊性\n\n为什么中文是挑战？\n\n无空格边界\n\n中文词语之间没有空格，BPE 无法依赖\n空格确定词边界，切分歧义大。\n\n字符集巨大\n\n常用汉字 3500+，全集 8万+，远超\n英文 26 字母，初始字符词表极大。\n\n字节序列长\n\n每个汉字 UTF-8 编码 3 字节，字节级\n初始表示比英文长 3 倍。\n\n实际 Token 效率对比\n\n同一句话（'人工智能改变世界'）\n\nLLaMA-1 (英文词表)\n\n人|工|智|能|改|变|世|界\n= 8 tokens\n\nQwen 2.5 (中文优化)\n\n人工智能|改变|世界\n= 3 tokens\n\nChatGLM (中文专用)\n\n人工智能|改变世界\n= 2 tokens\n\n专用词表可将中文 fertility 从 8x 降至 2~3x，显著提升效率\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 28,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00022"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\n工程实践建议\n\n英文单语言任务\n\n直接使用 GPT-4 / LLaMA 词表（cl100k 或 llama BPE），无需定制\n\n中文 / 双语场景\n\n优先选择 Qwen / ChatGLM 词表，或在 LLaMA 基础上扩展 2~3万 汉字 token\n\n多语言场景\n\n使用 mBERT / mT5 / Gemma 词表；确认训练数据覆盖目标语言，评估 fertility\n\n低资源语言\n\n用 SentencePiece 在目标语言数据上单独训练，再与基础词表合并\n\n评估 tokenizer 质量的核心指标：各目标语言的 Fertility + OOV 率\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 29,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00023"
+  },
+  {
+    "content": "第六部分  ·  Tokenizer 工程实践\n\nHuggingFace tokenizers 实战\n\n两种使用方式\n\n加载已有模型词表\n\nfrom transformers import AutoTokenizer\ntok = AutoTokenizer.from_pretrained(\n  'Qwen/Qwen2.5-7B')\nids = tok.encode('人工智能改变世界')\n# [104, 220, 14990, ...]\ntok.decode(ids)  # 还原文本\n\n常用属性查询\n\ntok.vocab_size      # 词表大小\ntok.all_special_tokens\ntok.convert_tokens_to_ids(['<s>'])\n\n训练自定义 BPE 词表\n\nfrom tokenizers import (\n  Tokenizer, models, trainers,\n  pre_tokenizers)\n\ntok = Tokenizer(models.BPE())\ntok.pre_tokenizer = (\n  pre_tokenizers.ByteLevel())\n\ntrainer = trainers.BpeTrainer(\n  vocab_size=32000,\n  special_tokens=[\n    '<unk>','<s>','</s>'])\ntok.train(['corpus.txt'], trainer)\ntok.save('my_tokenizer.json')\n\ntokenizers 库（Rust 实现）比 Python 快 20~100x，适合大规模语料训练\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 31,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00024"
+  },
+  {
+    "content": "第六部分  ·  Tokenizer 工程实践\n\n词表大小的权衡\n\n极端情况的代价\n\n词表过小（< 8k）\n\n• 高 fertility：简单词需多 token 表示\n\n• 序列变长：上下文窗口利用率低\n\n• 训练慢：模型要处理更长序列\n\n词表过大（> 300k）\n\n• Embedding 矩阵占用内存激增\n\n• 稀疏词难以学到好的表示\n\n• 推理时 softmax 分母变大\n\n主流模型词表大小\n\nBERT-base\n\n30,522\n\n早期，较小\n\nGPT-2\n\n50,257\n\n首代 GPT\n\nLLaMA-2\n\n32,000\n\n高效多语\n\nGPT-4 (cl100k)\n\n100,256\n\n当前主流\n\nQwen 2.5\n\n151,936\n\n中英优化\n\nGemma 2\n\n256,000\n\n超大词表\n\n经验值：英文单语言约 32k~50k；多语言/中文场景约 100k~256k\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 32,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00025"
+  },
+  {
+    "content": "第六部分  ·  Tokenizer 工程实践\n\n本课总结\n\n技术演进路线\n\n词级\n分词\n\n高 OOV\n\nBPE\n字符\n\n低 OOV\n\nBBPE\n字节\n\n零 UNK\n\nWP/SP\n统一\n\n多框架\n\n大词表\n多语\n\n100k+\n\n核心要点回顾\n\n子词是最佳平衡点\n\n在词表大小、序列长度、覆盖率三者间取得最佳平衡，是现代 LLM 的基础。\n\nBBPE 是零 UNK 的保证\n\n以 256 字节为初始词表，任意 Unicode 文本均可表示，已成主流大模型首选。\n\n词表大小影响多语言公平性\n\n扩大词表可降低 fertility，专用词表扩展是提升中文等非英语效率的常见手段。\n\nTokenizer 选型影响模型效果\n\n选择 tokenizer 时需评估目标语言 fertility 和 OOV 率，不应直接沿用英文词表。\n\n从字符到字节，从频次到概率：Tokenizer 的演进始终在覆盖率、效率与公平性之间寻求平衡\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 33,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00026"
+  }
+]

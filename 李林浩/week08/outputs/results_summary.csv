@@ -1,0 +1,9 @@
+﻿dataset,split,method,accuracy,precision,recall,f1,n,tp,tn,fp,fn,n_features,threshold
+bq_corpus_sample,validation,char_jaccard,0.9167,0.8571,1.0,0.9231,12,6,5,1,0,,0.1765
+bq_corpus_sample,validation,char_bigram_jaccard,0.8333,1.0,0.6667,0.8,12,4,6,0,2,,0.1176
+bq_corpus_sample,validation,tfidf_logreg,0.8333,0.8333,0.8333,0.8333,12,5,5,1,1,2764,
+bq_corpus_sample,validation,tfidf_svm,0.8333,0.8333,0.8333,0.8333,12,5,5,1,1,2764,
+lcqmc_sample,validation,char_jaccard,0.9167,1.0,0.8333,0.9091,12,5,6,0,1,,0.3077
+lcqmc_sample,validation,char_bigram_jaccard,0.9167,1.0,0.8333,0.9091,12,5,6,0,1,,0.1333
+lcqmc_sample,validation,tfidf_logreg,0.6667,0.6,1.0,0.75,12,6,2,4,0,2728,
+lcqmc_sample,validation,tfidf_svm,0.6667,0.6,1.0,0.75,12,6,2,4,0,2728,

@@ -1,0 +1,190 @@
+[
+  {
+    "text": "患者卫一因发热、咽痛2天，于2024年5月20日就诊，诊断为急性扁桃体炎，给予头孢克洛治疗。",
+    "entities": [
+      {"text": "卫一", "label": "人名", "start": 3, "end": 5},
+      {"text": "发热", "label": "症状", "start": 6, "end": 8},
+      {"text": "咽痛", "label": "症状", "start": 9, "end": 11},
+      {"text": "2024年5月20日", "label": "时间", "start": 14, "end": 24},
+      {"text": "急性扁桃体炎", "label": "疾病", "start": 31, "end": 38},
+      {"text": "头孢克洛", "label": "药物", "start": 43, "end": 47}
+    ]
+  },
+  {
+    "text": "蒋二，男，30岁，因饮食不洁导致急性肠胃炎，服用诺氟沙星胶囊。",
+    "entities": [
+      {"text": "蒋二", "label": "人名", "start": 0, "end": 2},
+      {"text": "急性肠胃炎", "label": "疾病", "start": 16, "end": 22},
+      {"text": "诺氟沙星胶囊", "label": "药物", "start": 26, "end": 33}
+    ]
+  },
+  {
+    "text": "2024年3月20日，沈三因头痛、头晕、恶心就诊，诊断为偏头痛。",
+    "entities": [
+      {"text": "2024年3月20日", "label": "时间", "start": 0, "end": 10},
+      {"text": "沈三", "label": "人名", "start": 11, "end": 13},
+      {"text": "头痛", "label": "症状", "start": 14, "end": 16},
+      {"text": "头晕", "label": "症状", "start": 17, "end": 19},
+      {"text": "恶心", "label": "症状", "start": 20, "end": 22},
+      {"text": "偏头痛", "label": "疾病", "start": 29, "end": 32}
+    ]
+  },
+  {
+    "text": "韩医生诊断患者杨四为支气管炎，给予氨溴索口服液和阿莫西林克拉维酸钾。",
+    "entities": [
+      {"text": "韩医生", "label": "人名", "start": 0, "end": 3},
+      {"text": "杨四", "label": "人名", "start": 8, "end": 10},
+      {"text": "支气管炎", "label": "疾病", "start": 12, "end": 17},
+      {"text": "氨溴索口服液", "label": "药物", "start": 21, "end": 28},
+      {"text": "阿莫西林克拉维酸钾", "label": "药物", "start": 31, "end": 41}
+    ]
+  },
+  {
+    "text": "朱五，女，45岁，患有甲状腺结节和乳腺增生，定期复查。",
+    "entities": [
+      {"text": "朱五", "label": "人名", "start": 0, "end": 2},
+      {"text": "甲状腺结节", "label": "疾病", "start": 9, "end": 15},
+      {"text": "乳腺增生", "label": "疾病", "start": 16, "end": 20}
+    ]
+  },
+  {
+    "text": "2024年4月5日，秦六因鼻塞、流涕、打喷嚏就诊，诊断为普通感冒。",
+    "entities": [
+      {"text": "2024年4月5日", "label": "时间", "start": 0, "end": 9},
+      {"text": "秦六", "label": "人名", "start": 10, "end": 12},
+      {"text": "鼻塞", "label": "症状", "start": 13, "end": 15},
+      {"text": "流涕", "label": "症状", "start": 16, "end": 18},
+      {"text": "打喷嚏", "label": "症状", "start": 19, "end": 22},
+      {"text": "普通感冒", "label": "疾病", "start": 29, "end": 33}
+    ]
+  },
+  {
+    "text": "尤七因腰痛、下肢放射痛，诊断为腰椎间盘突出症，给予布洛芬治疗。",
+    "entities": [
+      {"text": "尤七", "label": "人名", "start": 0, "end": 2},
+      {"text": "腰痛", "label": "症状", "start": 3, "end": 5},
+      {"text": "下肢放射痛", "label": "症状", "start": 6, "end": 11},
+      {"text": "腰椎间盘突出症", "label": "疾病", "start": 18, "end": 26},
+      {"text": "布洛芬", "label": "药物", "start": 31, "end": 34}
+    ]
+  },
+  {
+    "text": "许八患有高血压和高血脂，服用氨氯地平和阿托伐他汀治疗。",
+    "entities": [
+      {"text": "许八", "label": "人名", "start": 0, "end": 2},
+      {"text": "高血压", "label": "疾病", "start": 4, "end": 7},
+      {"text": "高血脂", "label": "疾病", "start": 8, "end": 11},
+      {"text": "氨氯地平", "label": "药物", "start": 15, "end": 20},
+      {"text": "阿托伐他汀", "label": "药物", "start": 23, "end": 29}
+    ]
+  },
+  {
+    "text": "患者何九于2024年1月20日被狗咬伤，于当日接种狂犬病疫苗。",
+    "entities": [
+      {"text": "何九", "label": "人名", "start": 3, "end": 5},
+      {"text": "2024年1月20日", "label": "时间", "start": 6, "end": 16},
+      {"text": "狂犬病疫苗", "label": "药物", "start": 26, "end": 32}
+    ]
+  },
+  {
+    "text": "吕医生为患者施十检查后，确诊为胆囊炎，给予头孢呋辛酯片治疗。",
+    "entities": [
+      {"text": "吕医生", "label": "人名", "start": 0, "end": 3},
+      {"text": "施十", "label": "人名", "start": 8, "end": 10},
+      {"text": "胆囊炎", "label": "疾病", "start": 16, "end": 19},
+      {"text": "头孢呋辛酯片", "label": "药物", "start": 24, "end": 31}
+    ]
+  },
+  {
+    "text": "张十一，男，60岁，有脑梗塞病史，出现肢体麻木症状。",
+    "entities": [
+      {"text": "张十一", "label": "人名", "start": 0, "end": 3},
+      {"text": "脑梗塞", "label": "疾病", "start": 10, "end": 13},
+      {"text": "肢体麻木", "label": "症状", "start": 19, "end": 23}
+    ]
+  },
+  {
+    "text": "2024年2月15日，孔十二因皮肤瘙痒、红斑就诊，诊断为荨麻疹。",
+    "entities": [
+      {"text": "2024年2月15日", "label": "时间", "start": 0, "end": 10},
+      {"text": "孔十二", "label": "人名", "start": 11, "end": 14},
+      {"text": "皮肤瘙痒", "label": "症状", "start": 15, "end": 19},
+      {"text": "红斑", "label": "症状", "start": 20, "end": 22},
+      {"text": "荨麻疹", "label": "疾病", "start": 29, "end": 32}
+    ]
+  },
+  {
+    "text": "曹十三因耳鸣、耳痛、听力下降，诊断为中耳炎，给予氧氟沙星滴耳液。",
+    "entities": [
+      {"text": "曹十三", "label": "人名", "start": 0, "end": 3},
+      {"text": "耳鸣", "label": "症状", "start": 4, "end": 6},
+      {"text": "耳痛", "label": "症状", "start": 7, "end": 9},
+      {"text": "听力下降", "label": "症状", "start": 10, "end": 14},
+      {"text": "中耳炎", "label": "疾病", "start": 21, "end": 24},
+      {"text": "氧氟沙星滴耳液", "label": "药物", "start": 29, "end": 37}
+    ]
+  },
+  {
+    "text": "严十四患有糖尿病，每日注射胰岛素，同时服用二甲双胍。",
+    "entities": [
+      {"text": "严十四", "label": "人名", "start": 0, "end": 3},
+      {"text": "糖尿病", "label": "疾病", "start": 5, "end": 8},
+      {"text": "胰岛素", "label": "药物", "start": 14, "end": 17},
+      {"text": "二甲双胍", "label": "药物", "start": 24, "end": 29}
+    ]
+  },
+  {
+    "text": "患者华十五，女，25岁，因痛经服用布洛芬缓释胶囊，症状缓解。",
+    "entities": [
+      {"text": "华十五", "label": "人名", "start": 3, "end": 6},
+      {"text": "痛经", "label": "症状", "start": 13, "end": 15},
+      {"text": "布洛芬缓释胶囊", "label": "药物", "start": 17, "end": 25}
+    ]
+  },
+  {
+    "text": "2024年3月10日，金十六因便秘、便血就诊，诊断为痔疮。",
+    "entities": [
+      {"text": "2024年3月10日", "label": "时间", "start": 0, "end": 10},
+      {"text": "金十六", "label": "人名", "start": 11, "end": 14},
+      {"text": "便秘", "label": "症状", "start": 15, "end": 17},
+      {"text": "便血", "label": "症状", "start": 18, "end": 20},
+      {"text": "痔疮", "label": "疾病", "start": 27, "end": 29}
+    ]
+  },
+  {
+    "text": "魏十七因关节疼痛、晨僵，诊断为类风湿关节炎，给予甲氨蝶呤治疗。",
+    "entities": [
+      {"text": "魏十七", "label": "人名", "start": 0, "end": 3},
+      {"text": "关节疼痛", "label": "症状", "start": 4, "end": 8},
+      {"text": "晨僵", "label": "症状", "start": 9, "end": 11},
+      {"text": "类风湿关节炎", "label": "疾病", "start": 18, "end": 25},
+      {"text": "甲氨蝶呤", "label": "药物", "start": 30, "end": 35}
+    ]
+  },
+  {
+    "text": "陶十八，男，35岁，有脂肪肝病史，医生建议戒酒并适当运动。",
+    "entities": [
+      {"text": "陶十八", "label": "人名", "start": 0, "end": 3},
+      {"text": "脂肪肝", "label": "疾病", "start": 10, "end": 13}
+    ]
+  },
+  {
+    "text": "患者姜十九于2024年4月25日出现心悸、胸闷症状，诊断为心律失常。",
+    "entities": [
+      {"text": "姜十九", "label": "人名", "start": 3, "end": 6},
+      {"text": "2024年4月25日", "label": "时间", "start": 7, "end": 17},
+      {"text": "心悸", "label": "症状", "start": 19, "end": 21},
+      {"text": "胸闷", "label": "症状", "start": 22, "end": 24},
+      {"text": "心律失常", "label": "疾病", "start": 31, "end": 35}
+    ]
+  },
+  {
+    "text": "戚医生诊断患者谢二十为抑郁症，开具氟西汀胶囊，并建议心理疏导。",
+    "entities": [
+      {"text": "戚医生", "label": "人名", "start": 0, "end": 3},
+      {"text": "谢二十", "label": "人名", "start": 8, "end": 11},
+      {"text": "抑郁症", "label": "疾病", "start": 13, "end": 16},
+      {"text": "氟西汀胶囊", "label": "药物", "start": 20, "end": 26}
+    ]
+  }
+]
