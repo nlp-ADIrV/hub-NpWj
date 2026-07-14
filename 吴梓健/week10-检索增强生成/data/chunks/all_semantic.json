@@ -1,0 +1,1179 @@
+[
+  {
+    "content": "LLM 推理基础设施\n\nKV Cache · vLLM · 约束性解码\n\n从原理到工程：理解推理侧三块关键基础设施\n\nAgent 系统铺垫课\n\n为后续 Agent 框架课程打通推理与解码侧的核心机制\n\nKV Cache  ·  PagedAttention  ·  Continuous Batching  ·  Prefix Caching  ·  Constrained Decoding\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 1,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00000"
+  },
+  {
+    "content": "推理性能的关键指标\n\nTTFT\n\nTime to First Token\n\n从发送请求到收到第一个\ntoken 的时间\n\n< 500ms 为优秀\n影响用户体验感知\n\nTPOT\n\nTime Per Output Token\n\nDecode 阶段每生成一个\ntoken 的平均耗时\n\n< 50ms 流畅体验\n= 1 / TPS\n\nThroughput\n\n系统吞吐量\n\n单位时间内处理的总 token\n数（所有并发请求之和）\n\n高并发部署核心指标\n单位：token/s\n\nMFU\n\nModel FLOPs Utilization\n\nGPU 实际算力利用率\nvs 峰值算力\n\nDecode 通常 < 20%\nPrefill 可达 40%+\n\n核心矛盾：低延迟 / 高吞吐 / 低显存三者难以同时最优 —— 推理优化的本质是在三角约束中找最佳平衡点\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 2,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00001"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\n自回归解码的两个阶段\n\nPrefill 阶段：处理 prompt\n\n输入：整段 prompt（n 个 token）一次性进入模型\n计算：对所有 n 个位置并行做 Attention\n输出：下一个 token 的概率分布\n特点：算力密集（compute-bound）\n\nDecode 阶段：逐 token 生成\n\n输入：上一步生成的 1 个 token\n计算：对当前位置做 Attention（看前面所有 token）\n输出：下一个 token，循环到 EOS\n特点：访存密集（memory-bound）\n\n时序示意（生成 4 个新 token）\n\nPrefill\n\nn tokens\n\nDecode 1\n\n+1 tok\n\nDecode 2\n\n+1 tok\n\nDecode 3\n\n+1 tok\n\nDecode 4\n\n+1 tok\n\n观察：Decode 阶段每步仅生成 1 个 token，但每步都在访问/计算前面所有位置的 K、V\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 4,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00002"
+  },
+  {
+    "content": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)\n\n图示：每步重算的范围\n\nStep 1\n\nStep 2\n\nStep 3\n\nStep 4\n\nStep 5\n\n红色：该步要重新计算 K、V    灰色：还未生成\n\nStep 5 重算了 5 个位置；其中 4 个在前几步算过 → 巨大冗余\n\n能不能把已经算过的 K、V 缓存下来，下一步直接用？这就是 KV Cache\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 5,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "title",
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00003"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\nK、V 可以缓存，Q 不能\n\n为什么 K、V 可以缓存\n\nK_i = W_K · h_i        V_i = W_V · h_i\n\n关键观察：第 i 个位置的 K、V 只依赖第 i 个 token 的 hidden state h_i\n→ 与未来要生成什么 token 无关\n→ 一旦算出，永远不变，可以缓存\n\nQ_t = W_Q · h_t   （每步的 h_t 在变）\n\n为什么 Q 不能缓存：Q 是\"我要查什么\"，每一步要查的对象不同\n新生成的 token 必然有新的 Q，必须重新算\n\n启用 KV Cache 后的 Decode 步骤\n\n输入新 token\n\n只把上一步生成的 1 个 token 送入模型\n\n算新位置的 Q,K,V\n\n每层只算 1 个位置（不是 t 个）\n\n把新 K,V 拼到缓存\n\nCache_K = [Cache_K, K_t]，V 同理\n\nAttention 用整个缓存\n\nQ_t 与缓存中所有 K、V 做注意力\n\n输出 logits → 采样\n\n得到下一个 token，回到第 1 步\n\n每步 Attention 复杂度：O(n²·d) → O(n·d)\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 6,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00004"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\nMHA\n\nMulti-Head Attention\n\n每个 Q head 都有独立\n的 K head 和 V head\n\nQ heads:\n\nKV heads:\n\nKV Cache 显存\n\n基准 (1×)\n\n代表模型：GPT-2, Bert\n\nMQA\n\nMulti-Query Attention\n\n所有 Q head 共享\n同一组 K/V head\n\nQ heads:\n\nKV heads:\n\nKV Cache 显存\n\n约 1/H (8× 减少)\n\n代表模型：PaLM, Falcon\n\nGQA\n\nGrouped-Query Attention\n\nQ heads 分组，每组\n共享一对 K/V head\n\nQ heads:\n\nKV heads:\n\nKV Cache 显存\n\n约 1/G (4× 减少)\n\n代表模型：Llama-2/3, Mistral\n\nLlama-3 采用 GQA（G=8）：H=32 Q heads，8 KV heads，KV Cache 比 MHA 减少 4×，精度接近 MHA\n\n通过模型结构变化减小KV\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 7,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00005"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\nKV Cache 的形状与显存占用\n\nKV Cache 的张量形状\n\n[L, 2, B, H, S, D_h]\n\nL：Transformer 层数\n2：K 和 V 两个张量\nB：batch size\nH：注意力头数\nS：已生成的序列长度（动态增长）\nD_h：每个头的维度\n\n字节数 = 2 · L · B · H · S · D_h · sizeof(dtype)\n\nBF16 时 sizeof = 2 字节\n\nLlama-2-7B 单条 4K 序列\n\n层数 L\n\n头数 H\n\nhead_dim D_h\n\n128\n\nseq_len S\n\n4096\n\nbatch B\n\ndtype\n\nBF16 (2 字节)\n\n2 × 32 × 1 × 32 × 4096 × 128 × 2\n≈ 2.0 GB\n\n对比：模型权重 BF16 约 14 GB\n→ batch=8、长度 4K 时 KV Cache (~16GB) 比权重还大\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 8,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00006"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\n代码示意：HuggingFace 中的 past_key_values\n\n朴素：每步重算（伪代码）\n\ntokens = tokenizer(prompt)\nfor step in range(max_new_tokens):\n    out = model(tokens)\n    next_id = sample(out.logits[:, -1])\n    tokens = cat([tokens, next_id])\n    # 每步把 tokens 整段重算 K,V\n\n启用 KV Cache（HF 标准用法）\n\npast = None\nids = tokenizer(prompt)\nfor step in range(max_new_tokens):\n    out = model(ids, past_key_values=past,\n                use_cache=True)\n    past = out.past_key_values\n    next_id = sample(out.logits[:, -1])\n    ids = next_id   # 只送入 1 个 token\n\n三个关键变化\n\nuse_cache=True\n\n告诉 forward 把 K、V 存下来并返回\n\npast_key_values 透传\n\n把上一步返回的 cache 喂给下一步\n\nids 只是新 token\n\n不再传整段历史，模型用 cache 拼接\n\n实测性能（Llama-7B, 1×A100）\n无 cache：约 8 tok/s（n² 增长）\n有 cache：约 60 tok/s（线性增长）\n→ 7~8× 加速，且生成越长差距越大\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 9,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00007"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\nKV Cache 带来的新瓶颈：显存与碎片\n\n缓存解决了重复计算，却引入新的工程问题\n\nMEM  显存吃紧\n\n长上下文场景缓存膨胀\n\n动态增长，难以预估峰值\n\nbatch size 受缓存挤压\n\nFRAG  内部碎片化\n\n提前按 max_len 预留空间\n\n实际只用一小部分\n\n浪费 60%~80% 显存常见\n\nSCH  调度低效\n\nbatch 内序列长度差异大\n\npadding 浪费算力与显存\n\n请求结束后空间难复用\n\n需要更聪明的 KV Cache 内存管理 → 引出 vLLM 的 PagedAttention\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 10,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00008"
+  },
+  {
+    "content": "Part 1  KV Cache 是什么、为何而生\n\n本节小结\n\n自回归 Decode 每步只产 1 个 token，但需要前面所有位置的 K、V\n\nK、V 只依赖位置自身的 hidden state，可以缓存；Q 必须每步重算\n\nKV Cache 把每步 Attention 从 O(n²) 降到 O(n)，加速 5~10×\n\n形状 [L, 2, B, H, S, D_h]，长上下文时可超过模型权重大小\n\n缓存带来显存压力与碎片化 → 推动了 vLLM 等工程化方案的诞生\n\n下一节：vLLM 如何把 KV Cache 用到极致\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 11,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00009"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nvLLM 解决了什么问题\n\n传统推理的显存利用率\n\n实际使用的 KV  35%\n\n预留但未用 (内部碎片)  50%\n\n请求间空隙 (外部碎片)  15%\n\n某些 batching 模式下，真正服务请求的显存只有 ~20-40%\n\n根因：KV Cache 在显存里是连续大块\n• 每个序列预先按最大长度申请\n• 实际生成长度短得多 → 浪费\n• 不同长度并存 → 间隙不可复用\n\nvLLM 的工程化收益\n\n2~4×\n\n吞吐提升\n\n同硬件下相对 HF Transformers 的吞吐比\n\n<4%\n\n显存碎片\n\nPagedAttention 把内部浪费压到 4% 以内\n\n10×+\n\n并发能力\n\n同样显存能容纳更大 batch、更多请求\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 13,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00010"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nPagedAttention：把虚拟内存搬进 KV Cache\n\n类比：操作系统把进程内存切成固定大小的 page，靠页表映射逻辑→物理。 PagedAttention 对 KV Cache 做同样的事。\n\n逻辑视图（一个序列）\n\n物理视图（block 池）\n\nThe\n\ncat\n\nsat\n\nthe\n\nmat\n\nand\n\nsaw\n\nblock 容量 = 4 token\n\n块表 (Block Table)：[ B5, B2, B7 ]\n\n逻辑块 0 → 物理 B5    逻辑块 1 → B2    逻辑块 2 → B7\n\n彩色：本序列    灰色：其他序列    白：空闲\n\n物理 block 不要求连续 → 显存碎片几乎为零\n\n逻辑序列按需追加 block，不再预留 max_len\n\nblock 可在序列间共享 → 为 Prefix Caching 打基础\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 14,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00011"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nPagedAttention 的工程收益\n\n显存利用对比（同样 80GB GPU，3 个并发序列）\n\n朴素：按 max_len 预留\n\nSeq A\n\n60%\n\nSeq B\n\n20%\n\nSeq C\n\n85%\n\n总浪费：约 45%（彩色之外的 frame 都是预留）\n\nPaged：按需分配 block\n\nSeq A 用 6 块\n\nSeq B 用 2 块\n\nSeq C 用 7 块\n\n空闲 1 块\n\n总浪费：< 4%（仅最后一个 block 部分填充）\n\n更高利用率 → 同样显存容纳更大 batch → 同硬件吞吐 2~4× → 单位 token 成本下降\n\n代价：每次 attention 多一次块表查找；GPU kernel 上做了专门优化，开销可忽略\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 15,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00012"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nContinuous Batching：让快的不等慢的\n\n静态 batching：同进同出\n\n彩色 = 实际生成    灰色 = 已结束但占着位置等齐\n\n问题：短序列结束后必须等长序列\nGPU 大量时间在跑\"占位计算\"\n\nContinuous batching：随到随走\n\nR4、R5 在 R1、R3 结束的瞬间补位入场\n\n做法：调度器在每个 step 后\n踢出已完成 + 加入新请求 → GPU 不停转\n\nPagedAttention 让动态加入/退出零碎片，是 Continuous Batching 的关键支撑\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 16,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00013"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nPrefill 与 Decode：完全不同的两类负载\n\nContinuous Batching 把它们混在同一卡上跑，但它们本质完全不同\n\nPrefill 阶段\n\n工作内容\n\n处理整段 prompt，一次算 n 个位置\n\n瓶颈类型\n\nCompute-bound（算力密集）\n\n矩阵形状\n\n[n, d] × [d, d] — 大矩阵乘\n\nGPU 利用率\n\n拉满（接近 TFLOPS 峰值）\n\n时延敏感\n\n决定 TTFT（首 token 时间）\n\n硬件偏好\n\n高算力卡：H100、H200、B200\n\nDecode 阶段\n\n工作内容\n\n每步只算 1 个新位置 + 读 KV 缓存\n\n瓶颈类型\n\nMemory-bound（访存密集）\n\n矩阵形状\n\n[1, d] × [d, d] — 退化为向量乘\n\nGPU 利用率\n\n低（卡在 HBM 带宽上）\n\n时延敏感\n\n决定 TPOT（每 token 时间）\n\n硬件偏好\n\n高带宽 + 大显存：A100/H20/MI300\n\n混跑的代价：一个长 prompt 的 prefill（几百 ms）会阻塞 batch 内所有 decode → TPOT 抖动；反过来 decode 又让 GPU 算力闲置\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 17,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00014"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nPD 分离：把 Prefill 和 Decode 拆到不同节点\n\n既然两阶段需求不同 → 干脆部署到不同实例，KV Cache 通过高速网络传输\n\n用户\n请求\n\nPrefill 节点\n\n高算力 GPU\n(H100 / B200)\n短任务高并发\n目标：低 TTFT\n\nKV Cache\n\nNVLink/RDMA\n\nDecode 节点\n\n高带宽 + 大显存\n(A100 / H20 / MI300)\n长流式低吞吐\n目标：稳定 TPOT\n\ntoken\n流\n\n两类节点的硬件取舍\n\nPrefill 节点\n\nDecode 节点\n\n首要指标\n\nFLOPS（算力）\n\nHBM 带宽 + 容量\n\n代表硬件\n\nH100 SXM, B200, MI300X\n\nA100, H20, L40S, MI300A\n\n并行策略\n\nTP 重，PP 几乎不用\n\nTP 中，PP 可拉长\n\n扩容方式\n\n按 prompt QPS 扩\n\n按生成长度·并发扩\n\nKV Cache\n\n产出方（写一次）\n\n消费方（读多次）\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 18,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00015"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nPD 分离：收益、与 Chunked Prefill 的关系、生产现状\n\nTTFT 与 TPOT 互不干扰\n\n再长的 prompt 也不会卡 decode\n\n按需选卡\n\nPrefill 配 H100；Decode 可用便宜的高带宽卡\n\n独立扩缩容\n\n短问长答 → 多扩 decode；反之亦然\n\nTCO 下降 30%~50%\n\nDistServe / Mooncake 论文实测\n\n和 Chunked Prefill 的关系\n\nChunked Prefill：单实例内时间片切分\n  把长 prefill 切片，与 decode 交错\n  轻量、不需新硬件，但 GPU 仍在切换\n\nPD 分离：跨实例物理分离\n  完全消除互相干扰\n  需高速互联，部署更复杂\n\n生产实现\n\nDistServe\n\n首篇系统化论文（OSDI'24）\n\nMooncake\n\nKimi 生产系统，KV-centric 架构\n\nvLLM v1\n\n原生 disagg prefilling 支持\n\nSGLang\n\nRadixAttention + PD 分离\n\nPD 分离 = 把 KV Cache 当成一等公民跨节点流转 — Agent 高并发场景下的下一站\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 19,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00016"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nPrefix Caching：共享公共前缀\n\n典型场景：多个请求共享同一段 prompt\n\nReq 1\n\nsystem + few-shot\n\n总结这段文字\n\nReq 2\n\nsystem + few-shot\n\n翻译成英文\n\nReq 3\n\nsystem + few-shot\n\n提取关键词\n\n青色：公共前缀（500 tokens）   橙色：各自后缀（20 tokens）\n\n无缓存：三个请求各自跑一遍 prefill\n→ 同样的 500 tokens 算了 3 次\n→ 浪费 1000 tokens 的算力\n\n在 Agent 多轮、RAG few-shot 中尤其严重\n\nPrefix Caching 的做法\n\n对每个 block 内容算 hash\n\n新请求来时，逐 block 比对 hash\n\n命中的 block 直接复用 KV，不再 prefill\n\n未命中处接着算，并把新 block 加入缓存池\n\n实测加速（共享 1K 前缀）\n首请求：和无缓存一样\n后续请求：TTFT 降至 1/5 ~ 1/10\nAgent 工具循环 / RAG / 评测：\n几乎无成本扩并发\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 20,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00017"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nvLLM 的其他实用特性\n\nTP/PP\n\n张量/流水线并行\n\n单机多卡或多机推理超大模型 (70B、405B)\n\nSpecD\n\nSpeculative Decoding\n\n小模型起草+大模型验证，2~3× 加速\n\nChunkP\n\nChunked Prefill\n\n把超长 prompt 切片与 decode 混合调度，降低尾延迟\n\nLoRA\n\nLoRA 多租户\n\n同一基座模型挂多个 LoRA，按请求路由\n\nQuant\n\n量化推理\n\nAWQ / GPTQ / FP8 等多种量化格式开箱即用\n\nGuide\n\nGuided / 约束解码\n\nguided_json / guided_regex / guided_choice（下一节重点）\n\n六个特性各自对一类痛点 — 共同把 vLLM 撑成生产级 LLM 服务平台\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 21,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00018"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\n最小可运行示例\n\n方式 A：Python 离线推理\n\nfrom vllm import LLM, SamplingParams\n\nllm = LLM(model=\"meta-llama/Llama-3-8B\")\n\nparams = SamplingParams(\n    temperature=0.7,\n    max_tokens=256\n)\n\noutputs = llm.generate(\n    [\"介绍一下 KV Cache\"],\n    params\n)\nprint(outputs[0].outputs[0].text)\n\n适合：批量评测、离线生成、研究\n\n方式 B：OpenAI 兼容服务\n\n# 启动服务\n$ python -m vllm.entrypoints.openai.api_server \\\n    --model meta-llama/Llama-3-8B\n\n# 客户端 (任意 OpenAI SDK)\nimport openai\ncli = openai.OpenAI(\n    base_url=\"http://localhost:8000/v1\",\n    api_key=\"EMPTY\")\nresp = cli.chat.completions.create(\n    model=\"meta-llama/Llama-3-8B\",\n    messages=[{\"role\":\"user\",\"content\":\"hi\"}])\n\n适合：Agent 调用、生产服务、与现有 OpenAI 客户端兼容\n\n启动一行命令即拥有：PagedAttention + Continuous Batching + Prefix Caching\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 22,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00019"
+  },
+  {
+    "content": "Part 2  vLLM：把 KV Cache 用到极致\n\nvLLM 的设计哲学\n\n把显存当一等公民\n\nMemory as first-class\n\n不是\"算力的副产品\"，而是核心调度对象\nPagedAttention 把 OS 经验搬到 GPU 上\n\n把调度当系统问题\n\nScheduling as a system\n\nContinuous Batching、抢占式调度、优先级\n请求调度独立于模型计算\n\n为高并发场景而生\n\nBuilt for concurrency\n\nAgent 多轮、RAG、评测、API 服务\n每个特性都对一类共享/复用模式\n\n下一节：在 vLLM 上启用约束解码 — 让 LLM 输出永远合法\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 23,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00020"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n为什么需要约束性解码\n\n场景：Agent 让 LLM 输出工具调用 JSON\n\nLLM 自由生成的真实样例\n\n{\"tool\": \"search\", \"query\": \"天气}\n\n缺少右引号\n\n{\"tool\": \"search\", \"args\" {...}}\n\n丢失冒号\n\n{\"tool\": serach, \"args\": {}}\n\n字段名拼错 + 字符串没引号\n\n好的，我来调用搜索工具：{\"tool\"...\n\n前面带了多余解释文字\n\n两种应对方式\n\n方案 A：事后修复（脆弱）\n\n• 用正则补逗号、修引号\n• try / except，失败就重试\n• prompt 工程：\"请输出 JSON\"\n\n→ 失败率高、不可控、贵\n\n方案 B：约束性解码（根治）\n\n• 在采样阶段就限制只能选合法 token\n• 100% 保证语法正确\n• 几乎零额外开销\n\n→ Function Calling、Agent 工具调用、\n   结构化输出的工业标准\n\n当下一步任务依赖于 LLM 输出格式，约束解码不是\"加分项\"，而是\"基础设施\"\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 25,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00021"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n切入点：采样的本质\n\nLLM 每生成一个 token 的过程\n\nhidden\nstate\n\nlogits\n\nshape: [V]\n\nsoftmax\n\n概率分布\n\n采样\n(top-p, T)\n\n下一个\ntoken\n\n关键观察：logits → softmax → 概率分布 这一步，概率分布是张完全可以\"动手\"修改的张量\n\n一个直观的示例：词表大小 = 5\n\n原始 logits\n\nthe\n\n<EOS>\n\nMask 后 logits\n\nthe\n\n<EOS>\n\nsoftmax 概率\n\nthe\n\n<EOS>\n\n中间：把 \"the\" 和 <EOS> 的 logit 设为 -∞ → softmax 后概率为 0，永远不会被采到\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 26,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00022"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n核心机制：Logits Mask\n\n5 行实现一个 mask（PyTorch 伪码）\n\n# logits: shape [vocab_size]\nallowed = compute_allowed_tokens(state)\n\nmask = torch.full_like(logits,\n                       float('-inf'))\nmask[allowed] = 0\nlogits = logits + mask  # 一行屏蔽\n\n# 后续 softmax / 采样不变\nprobs = logits.softmax(-1)\nnext_id = sample(probs)\n\n关键点：约束解码 = 决定 allowed 集合\n采样、温度、top-p 全部保留\n概率被压在合法 token 内重新归一化\n\n每生成一个 token，要回答的问题\n\n当前所处的解析状态下，\n\n下一个 token 集合 allowed = ?\n\n回答这个问题的方式 → 三种主流方案\n\n正则 → DFA\n\n适合手机号、日期、ID 等定长格式\n\n上下文无关文法 (CFG)\n\n适合 JSON、SQL、Python 等嵌套结构\n\nJSON Schema → 文法\n\n工业最常用：用户描述 schema，框架自动转\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 27,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00023"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n用有限状态机 (FSM) 驱动 mask\n\n约束解码的状态视角\n\n已开 {\n\n在 key\n\n在 value\n\n\":\"\n\n每个状态对应一个 allowed 集合（解码时按状态 mask）\n\nS0 (起点)\n\n只允许 \"{\"\n\nS1 (已开 {)\n\n只允许 '\"'（开始一个 key）\n\nS2 (在 key)\n\n允许任何字符 + \":\"（结束 key）\n\nS3 (在 value)\n\n允许任何字符 + \"}\"（结束 JSON）\n\nS4 (结束)\n\n只允许 <EOS>\n\n解码每步：模型给 logits → 按当前状态查 allowed → mask → 采样 → 状态前进\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 28,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00024"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n方案 A：正则表达式 → DFA → Mask\n\n适合简单线性格式：手机号、日期、UUID、枚举…\n\n用户提供正则\n\n^1[3-9]\\d{9}$\n\n正则 → DFA（一次性预处理）\n\n在 DFA 每个状态预先算好\"该状态下哪些字符合法\"\n\n解码时按当前 DFA 状态查表，mask 不合法 token\n\n采样后按字符前进 DFA 状态\n\nDFA 状态片段（手机号匹配）\n\nS10\n\n[3-9]\n\n[0-9]×8\n\nS0 → 只能 \"1\"\nS1 → 只能 \"3\"~\"9\"\nS2 → 只能 \"0\"~\"9\"\n…直到 S10 → 只能 <EOS>\n\n性能：DFA 查询 O(1)\n代表实现：Outlines (regex), vLLM guided_regex\n局限：不支持递归/嵌套结构（→ 方案 B）\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 29,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00025"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n方案 B：上下文无关文法 (CFG)\n\n正则表达不了嵌套：JSON、SQL、Python 都需要 CFG（栈式状态）\n\nJSON 文法（部分规则）\n\nvalue   ::= object | array\n          | string | number\n          | \"true\" | \"false\" | \"null\"\nobject  ::= \"{\" pair (\",\" pair)* \"}\"\n          | \"{}\"\npair    ::= string \":\" value\narray   ::= \"[\" value (\",\" value)* \"]\"\nstring  ::= '\"' char* '\"'\n\n为什么不能用正则：object 里嵌 object，array 里嵌 array → 任意深度\n→ 需要栈来记\"开了几层\"\n\n解码过程（栈式 PDA）\n\ntoken\n\n栈状态\n\n下一步 allowed\n\n[obj]\n\nstring 起 → \"\n\n[obj, str]\n\n任意字符 + \"\n\n[obj, str]\n\n任意字符 + \"\n\n[obj]\n\n只能 :\n\n[obj]\n\nvalue 起：{ [ \" 数字 t f n\n\n[obj, obj]\n\n只能 \" 或 }（嵌套层）\n\n代表实现：Outlines (cfg), lm-format-enforcer, xgrammar\n性能：栈操作每步 O(1)~O(规则数)\nxgrammar 在 GPU 上做 mask 几乎零开销\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 30,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00026"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n方案 C：JSON Schema → 文法 → 解码\n\n工业最常用：写一份 schema，框架自动转文法并强制执行\n\n用户：写一份 JSON Schema\n\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"tool\": {\n      \"type\": \"string\",\n      \"enum\": [\"search\", \"calc\"]\n    },\n    \"args\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"q\": {\"type\": \"string\"}\n      },\n      \"required\": [\"q\"]\n    }\n  },\n  \"required\": [\"tool\", \"args\"]\n}\n\n被强制的约束（一项也不会错）\n\n字段顺序\n\n按 properties 顺序输出（部分实现可设）\n\n字段名拼写\n\n属性名只能是 schema 中定义的精确字符串\n\nstring / number / array / object 严格匹配\n\nenum 字段只能从给定列表中选\n\nrequired 中的字段一定出现，不会漏\n\nobject 内部递归地按其 schema 约束\n\nvLLM、OpenAI、Outlines、xgrammar 全部支持 schema 直传\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 31,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00027"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n性能与陷阱\n\n性能开销（每步 mask 计算）\n\n吞吐影响\n\n正则 → DFA\n\n≈ O(1)\n\n几乎无影响\n\nJSON 文法 (CFG)\n\n栈操作 + 表查询\n\n原生 ~5-15% 慢\n\nxgrammar (GPU mask)\n\nGPU 并行查表\n\n<3% 慢\n\nlm-format-enforcer\n\nCPU 计算\n\n10-30% 慢\n\n选 GPU 端方案（xgrammar / vLLM 内置）\nJSON Schema 路径在生产中开销可忽略\n速度损失 ≪ 后处理失败重试的损失\n\n常见陷阱\n\nTokenizer 与字符级文法不对齐\n\nBPE 把 \"\\\"name\\\"\" 分成多 token；mask 必须在 token 边界做\n\n约束太死会牺牲质量\n\n强制冷门 token → 概率塌陷到低质内容；要给生成留出选择空间\n\n枚举顺序影响生成偏好\n\nenum: [\"yes\",\"no\"] 与 [\"no\",\"yes\"] 命中率会不同\n\nEOS 必须显式允许\n\n最终状态忘记 allow EOS → 模型陷入死循环\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 32,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00028"
+  },
+  {
+    "content": "Part 3  约束性解码\n\nvLLM 中的约束解码：guided_*\n\nvLLM SamplingParams 提供的四种约束模式\n\nguided_choice\n\n从给定字符串列表中选一个\n\nguided_regex\n\n符合给定正则\n\nguided_json\n\n符合给定 JSON Schema / Pydantic 模型\n\nguided_grammar\n\n符合给定 EBNF 文法\n\n情感分类：guided_choice\n\nfrom vllm import LLM, SamplingParams\n\nparams = SamplingParams(\n    guided_decoding=GuidedDecoding(\n        choice=[\"positive\",\n                \"negative\",\n                \"neutral\"]\n    )\n)\nout = llm.generate(\"评价：味道很糟\", params)\n# 一定从三选一，不会再说别的\n\n工具调用：guided_json\n\nfrom pydantic import BaseModel\n\nclass ToolCall(BaseModel):\n    tool: Literal[\"search\", \"calc\"]\n    query: str\n\nparams = SamplingParams(\n    guided_decoding=GuidedDecoding(\n        json=ToolCall.model_json_schema()\n    )\n)\n# 输出 100% 可被 ToolCall.parse_raw 解析\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 33,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00029"
+  },
+  {
+    "content": "Part 3  约束性解码\n\n本节小结\n\n约束解码 = 在采样前给 logits 盖一张\"语法掩码\"，让概率只落在合法 token 上\n\n三种主流方案：正则/DFA → CFG → JSON Schema，覆盖从枚举到嵌套结构\n\n本质都是\"用一个状态机/语法决定每步的 allowed 集合\"\n\nGPU 端实现（xgrammar、vLLM 内置）开销可忽略，是生产标配\n\n陷阱：tokenizer 边界、过度约束、忘记 allow EOS、枚举顺序偏好\n\n对 Agent 而言：是工具调用、可靠 JSON、安全护栏的基础设施\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 34,
+      "section": "1. 把已有的 t 个 token 重新输入模型\n2. 每一层都重新计算所有 t 个位置的 Q、K、V\n3. 做完整 Attention，取最后一个位置的输出\n\n代价：前 t-1 个位置的 K、V 在上一步早就算过\n这一步又算了一遍 → 纯粹浪费\n\n复杂度：生成 n 个 token 总共 O(n³·d)",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "kvcache原理"
+    },
+    "chunk_id": "kvcache原理_00030"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\n从文字到数字\n\n模型只能处理数字，文本必须先经过 Tokenizer 转化为 Token ID 序列。\n\n原始文本\n\n\"Hello, world!\"\n\nTokenizer\n\n切分 + 编码\n\nToken IDs\n\n[15496, 995, 0]\n\nEmbedding\n\n向量查表\n\n语言模型\n\nTransformer\n\n为什么不直接用字符？\n\n序列过长，英文 100 词约 500+ 字符，计算代价极高\n\n为什么不直接用单词？\n\n词表爆炸（数十万词），未登录词 UNK 问题严重\n\n子词是折中方案\n\n词表大小可控（30k~100k），覆盖率高，保留语义信息\n\nTokenizer 影响模型能力\n\n分词质量直接影响困惑度和下游任务效果\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 2,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00000"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\n三种切分粒度对比\n\n示例词汇：\"unhappiness\"\n\n字符级（Character）\n\nu n h a p p i n e s s\n\n11 tokens\n\n• 词表极小（约 100）\n\n• 无 UNK 问题\n\n• 序列极长，训练慢\n\n• 字符本身无语义\n\n词级（Word）\n\nunhappiness\n\n1 token\n\n• 单元有完整语义\n\n• 序列最短\n\n• 词表巨大（50 万+）\n\n• 新词 -> UNK\n\n子词级（Subword）\n\nun  |  happiness\n\n2 tokens\n\n• 词表适中（30k~100k）\n\n• 覆盖率高，稀有词可拆分\n\n• 需要训练词表\n\n• 多语种公平性有挑战\n\n现代 LLM 均采用子词级分词，在词表大小、序列长度、覆盖率之间取得最佳平衡。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 3,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00001"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\nUNK 问题的本质\n\n词级分词的困境\n\n拼写错误\n\n\"recieve\" → [UNK]\n\n训练集中从未出现\n\n专有名词\n\n\"ChatGPT\" → [UNK]\n\n新产品、人名地名层出不穷\n\n形态变化\n\n\"unhappiest\" → [UNK]\n\n词根词缀组合数量庞大\n\n多语言混合\n\n\"cafe\" → [UNK]\n\n特殊字符或非英语词汇\n\nUNK 的危害\n\n信息损失：未登录词共享同一向量，语义混淆\n\n训练困难：UNK 梯度无法回传到具体词汇\n\n生成错误：解码时 UNK 出现破坏文本连贯\n\n语言不公平：低资源语言 UNK 率远高英语\n\n目标：构建分词方案，使得任意文本均可表示，无需 UNK\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 4,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00002"
+  },
+  {
+    "content": "第一部分  ·  为什么需要 Tokenizer？\n\n理想 Tokenizer 的三个目标\n\n零 UNK 覆盖率\n\n任意输入文本均可被无损表示，不出现 [UNK] 标记。\n这要求词表在底层具备完备性——字节级方案是最彻底的实现路径。\n\n高压缩率\n\n相同语义内容用尽可能少的 token 表达。\ntoken 数越少，上下文利用率越高，推理越快，长文本支持越好。\n\n多语言公平性\n\n各语言的 token fertility（词/token 比）应均衡。\n不应让英语 1 token 对应一个词，其他语言却需 4~6 个 token。\n\n接下来：BPE -> BBPE -> WordPiece -> SentencePiece，逐步看各方案如何满足这三个目标\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 5,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00003"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 的起源\n\n从数据压缩到 NLP\n\n1994\n\nBPE 由 Philip Gage 提出\n\n用于无损数据压缩，核心思想：反复合并最高频字节对\n\n2015\n\nSennrich 等引入 NLP\n\n论文《Neural Machine Translation of Rare Words with Subword Units》\n\n2018\n\nGPT / GPT-2 采用\n\nOpenAI 使用 BPE 构建 40k/50k 词表，成为主流方案\n\n2020+\n\n几乎所有大模型沿用\n\nLLaMA / Qwen / Gemma 等均基于 BPE 或其变体\n\n压缩思想迁移到分词\n\n数据压缩中的 BPE：\n\n将最频繁出现的字节对替换为新符号，\n减少数据体积。\n\nNLP 中的迁移：\n\n将最频繁出现的字符对合并为子词单元，\n扩大词表覆盖范围。\n\n核心洞察：\n\n高频共现的字符序列往往携带语义信息\n（如 ing / un / tion 等词缀）。\n\nBPE = 用频次驱动的贪心合并，从字符出发逐步构建子词词表\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 7,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00004"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 算法步骤\n\n初始化词表\n\n将语料中每个词拆成字符序列，末尾加 </w>（词尾标记）\n收集所有字符作为初始词表\n\n统计频次\n\n遍历语料，统计所有相邻符号对（bigram）的出现次数\n\n合并最高频对\n\n找出频次最高的符号对 (a, b)，将所有 a b 合并为 ab\n将 ab 加入词表\n\n迭代直到目标词表大小\n\n重复步骤 2-3，每次迭代合并一个新子词单元\n通常执行 10k~40k 次合并\n\nvocab = char_split(corpus)\nmerges = []\nfor i in range(num_merges):\n  pairs = count_pairs(vocab)\n  best = max(pairs, key=pairs.get)\n  vocab = merge_pair(vocab, best)\n  merges.append(best)\n# apply merges in order on new text\n\n合并规则按学习顺序应用：先合并的规则优先级更高\n\n关键参数：num_merges（合并次数）= 词表大小 - 初始字符数\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 8,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00005"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\n词表构建演示\n\n语料：\"low low low low low lower lower newest newest widest\"\n\n合并轮次\n\n最高频对\n\n合并后新单元\n\n词表变化\n\n初始状态\n\nl, o, w, e, r, n ...\n\n第 1 次\n\n(e, s)\n\nes 加入词表\n\n第 2 次\n\n(es, t)\n\nest\n\nest 加入词表\n\n第 3 次\n\n(lo, w)\n\nlow\n\nlow 加入词表\n\n第 4 次\n\n(low, </w>)\n\nlow</w>\n\nlow</w> 加入\n\n第 5 次\n\n(n, e)\n\nne 加入词表\n\n经过 N 次合并后，原本未登录的词可被拆为已知子词：widest -> wide + st（而非 UNK）\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 9,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00006"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 如何减少 UNK\n\n新词拆解示例\n\ntokenization\n\ntoken | ization\n\n常见子词组合\n\nChatGPT\n\nChat | G | PT\n\n部分子词已知\n\nunhappiest\n\nun | happi | est\n\n词缀均已知\n\nxyzabc123\n\nxy | z | ab | c1\n\n字符级退化\n\nUNK 率对比\n\n新闻语料 OOV 率（估算）\n\n词级（50k）\n\n3.2%\n\nBPE 30k\n\n0.04%\n\nBPE 50k\n\n0.01%\n\n词级分词约 3% OOV（百万词量规模），\nBPE 可将其降至 <0.05%，几乎消灭 UNK。\n\nBPE 的兜底：任意词在最坏情况下被拆回单个字符，词表仍能覆盖\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 10,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00007"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nBPE 的局限性\n\n贪心合并，非全局最优\n\n每次只选频次最高的一对，可能错过更优的子词边界。\n同一个词在不同上下文可能被切分为不同子词。\n\nlower → low+er  OR  lo+wer\n\n跨语言词表不均衡\n\n在英语语料上训练的 BPE，中文/日文等非拉丁语系\n需要更多 token 表达相同信息（fertility 问题）。\n\n\"nihao\" → [ni, ha, o]  # 3 tokens\n\n仍有极少量 UNK\n\n字符级 BPE 依赖字符集，如果训练语料缺少某些\nUnicode 字符，仍会出现 UNK。\n\n\"rare_char\" → [UNK]\n\n解决方案：BBPE（字节级 BPE）从根源消灭 UNK——下一部分介绍\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 11,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00008"
+  },
+  {
+    "content": "第二部分  ·  BPE：字节对编码\n\nGPT-2 中的 BPE 实践\n\nGPT-2 Tokenizer 设计决策\n\n词表大小：\n\n50,257（含 256 字节 + BPE 合并 + <|endoftext|>）\n\n初始词表：\n\n所有 UTF-8 字节（256 个），确保任意文本均可编码\n\n空格处理：\n\n将空格归入后续词（如 ' hello' 不同于 'hello'）\n\n标点规则：\n\n标点单独成词，不与前后字符合并\n\n合并次数：\n\n约 50,000 次合并迭代\n\n实际效果示例\n\nimport tiktoken\nenc = tiktoken.get_encoding(\"gpt2\")\n\n# 'Hello, world!'\nenc.encode(\"Hello, world!\")\n# [15496, 11, 995, 0]\n\n# 4 tokens for 3 words\nenc.encode(\"tokenization\")\n# [30001, 1634, 341]  # 3 tokens\n\n压缩率对比（英文）：\n\n字符级：~4.5 chars/token\n\nGPT-2 BPE：~4.0 chars/token\n\nGPT-4 BPE：~4.5 chars/token\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 12,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00009"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\n从字符到字节：为什么需要 BBPE？\n\n字符级 BPE 的根本问题\n\nUnicode 覆盖不完全\n\nUnicode 有 140,000+ 字符，任何训练语料\n都不可能覆盖全部，边缘字符仍出现 UNK。\n\n词表大小爆炸\n\n多语言模型若要覆盖所有脚本的字符，\n初始字符词表可达数千，难以管理。\n\n新表情 / 特殊符号\n\n新 emoji、数学符号、古文字等在训练时\n不存在，部署后遇到即产生 UNK。\n\n字节级的根本解法\n\n任何文本 = UTF-8 字节序列\n256 个字节值覆盖所有可能输入\n\nUTF-8 编码示意\n\n# 'A'  → 0x41        (1 byte)\n# 'e'  → 0xC3 0xA9   (2 bytes)\n# '中' → 0xE4 0xB8 0xAD  (3B)\n# emoji → 0xF0...    (4 bytes)\n# ALL text: 256 byte values\n\nBBPE 将这 256 个字节作为初始词表，\n之后的 BPE 合并步骤与原版完全相同。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 14,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00010"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\nBBPE 核心思路：256 字节作为初始词表\n\nBPE vs BBPE 对比\n\n对比维度\n\nBPE（字符级）\n\nBBPE（字节级）\n\n初始词表\n\n所有字符（语言相关）\n\n256 字节值（语言无关）\n\n覆盖范围\n\n训练语料中出现的字符\n\n所有 UTF-8 文本（无例外）\n\nUNK 风险\n\n有（罕见字符/新符号）\n\n零 UNK（理论保证）\n\n初始词表大小\n\n数十到数百\n\n恒定 256\n\n多语言支持\n\n需要语言特定字符\n\n统一字节空间，天然支持\n\nBBPE 是 BPE 的最小改动版本：只替换初始词表，算法本身不变\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 15,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00011"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\n多语言支持原理\n\n同一字节空间统一不同语言\n\n无论文字属于哪种语言，BBPE 均通过相同的\n256 字节值域进行表示，无需分别处理。\n\nEnglish\n\nhello →\n\n68 65 6C 6C 6F\n\n(5 bytes)\n\nChinese\n\n你好 →\n\nE4 BD A0 E5 A5 BD\n\n(6 bytes)\n\nArabic\n\nمرحبا →\n\nD9 85 D8 B1 ...\n\n(10 bytes)\n\nEmoji\n\nHello! →\n\nF0 9F 91 4B\n\n(4 bytes)\n\nBPE 合并后的跨语言共享\n\n高频字节序列在多种语言中共享合并规则：\n\nC3 A9 → e(accent)\n\n法语、西班牙语重音字母\n\nE4 B8 → 东亚字符前缀\n\n汉字、日文共享字节前缀\n\n20 → 空格(0x20)\n\n所有使用空格的语言共享\n\nBBPE 的合并规则天然跨语言共享——同一字节序列无论属于哪种语言均适用\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 16,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00012"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\nBBPE 与 BPE 的算法差异\n\nBPE 流程\n\n# Step 0: 初始化（字符级）\nvocab = {'l','o','w','e','r',...}\n\n# Step 1: 统计字符对频次\npairs = count_pairs(vocab)\n\n# Step 2: 合并最高频对\nbest = max(pairs, key=pairs.get)\nvocab = merge(vocab, best)\n\n初始词表依赖语言字符集\n\nBBPE 流程\n\n# Step 0: 初始化（字节级）\nvocab = {0x00, 0x01, ..., 0xFF}\n# 256 个字节，语言无关\n\n# Step 1-2: 完全相同\npairs = count_pairs(vocab)\nbest = max(pairs, key=pairs.get)\nvocab = merge(vocab, best)\n\n256 字节，语言无关，零 UNK\n\nBBPE = BPE with byte vocabulary  ·  仅 Step 0 不同，其余完全一致\n\nGPT-2 / LLaMA / Qwen 均使用 BBPE 或其改进版，词表基础为字节级。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 17,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00013"
+  },
+  {
+    "content": "第三部分  ·  BBPE：字节级 BPE\n\nBBPE 的代价与权衡\n\n零 UNK 的代价\n\n序列变长\n\n字节级初始表示比字符级更细粒度，即使相同\n文本也需要更多 token（低资源语言尤其明显）。\n\n\"中\" → 3 bytes → 最终可能 1~2 tokens\n\n低资源语言 fertility 偏高\n\n训练数据以英文为主时，中文/阿拉伯文的字节序列\n合并次数少，每个词对应更多 tokens。\n\n英文约 1.3 char/token，中文约 2~3 bytes/token\n\n学习成本上升\n\n模型需要从字节序列中自行学习字符边界，\n对语言结构的理解依赖更多训练数据。\n\nLLaMA-1 vs Qwen: 中文 token 效率相差 3x\n\n缓解策略\n\n扩大词表\n\n增大 num_merges，使高频字节序列都有对应 token。Qwen 词表达 150k+，中文效率大幅提升。\n\n多语言语料平衡\n\n训练时提高非英文语料比例（upsampling），让模型充分学习各语言字节合并模式。\n\n专用子词扩展\n\n在 BBPE 基础上为目标语言追加高频字词（如汉字直接加词表），兼顾效率与覆盖。\n\nBBPE 以轻微效率损失换取完整语言覆盖，是目前主流大模型的首选\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 18,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00014"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\nWordPiece（BERT 使用）\n\n与 BPE 的关键区别\n\nBPE 按频次贪心合并；WordPiece 按语言模型\n似然（likelihood）最大化来选择合并对。\n\nscore(a,b) = freq(ab) / (freq(a) * freq(b))\n\n分子越大（ab 常见），分母越小（a、b 单独罕见），\n说明合并这对更能减少不确定性。\n\n连续子词前缀：\n\n## 标记非词首子词（##ing, ##tion）\n\n分词方向：\n\n从左到右，找词表中最长匹配\n\n代表模型：\n\nBERT / DistilBERT / ELECTRA / XLM\n\n词表大小：\n\n典型 30k（BERT-base：30,522）\n\n分词示例\n\n# BERT WordPiece 示例\nfrom transformers import BertTokenizer\ntok = BertTokenizer.from_pretrained(\n  'bert-base-uncased')\n\ntok.tokenize('unaffable')\n# ['un', '##affect', '##able']\n\ntok.tokenize('tokenization')\n# ['token', '##ization']\n\n## 前缀区分词首/非词首子词，有助于还原词边界。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 20,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00015"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\nSentencePiece：语言无关的统一框架\n\n核心设计思路\n\n传统方案的隐含依赖\n\nBPE / WordPiece 需要先按空格/标点预切分文本（预分词步骤），这一步依赖语言规则：中文无空格，阿拉伯文规则各异，无法跨语言直接复用。\n\n中文 \"人工智能\" → 无空格 → BPE 无法预分词\n英文 \"hello world\" → 有空格 → BPE 可处理\n\nSentencePiece 的解法\n\n把空格替换为特殊字符 ▁（U+2581），文本变成纯字符流。算法直接在原始 Unicode 上运行，不需要任何语言特定预处理。\n\n\"Hello world\" → ▁Hello  ▁world → 子词序列\n\n框架结构：算法可选\n\n内嵌 BPE\n\n频次驱动合并\nGPT / LLaMA 风格\n\n内嵌 Unigram\n\n概率化剪枝\nT5 / mT5 风格\n\nimport sentencepiece as spm\nspm.SentencePieceTrainer.train(\n  input='corpus.txt',\n  model_prefix='spm',\n  vocab_size=32000,\n  model_type='bpe')\n\n采用 SentencePiece 的代表模型：\n\nLLaMA 1/2/3：SentencePiece + BPE\n\nT5 / mT5：SentencePiece + Unigram\n\nALBERT：SentencePiece + Unigram\n\nSentencePiece = 把空格变成字符 ▁  →  文本成为字符流  →  彻底消除语言预处理依赖\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 21,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00016"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\nUnigram Language Model 分词\n\n与 BPE 的逆向思路\n\nBPE 从小词表出发，不断合并（自下而上）\nUnigram 从大词表出发，不断剪枝（自上而下）\n\n初始化大词表\n\n收集语料中所有子串（字符/子词），初始词表可达 20万+\n\n计算子词概率\n\n用 EM 算法估计每个子词的 unigram 概率 P(x)\n\n剪枝低价值子词\n\n移除对语料 log-likelihood 影响最小的子词\n\n迭代至目标词表\n\n重复步骤 2-3，直到词表缩减到目标大小（如 32k）\n\nUnigram 的核心优势\n\n概率化分词路径\n\n同一词可有多种合法切分，模型输出每种切分\n的概率，训练时可采样多种切分增强鲁棒性。\n\n更平滑的词表覆盖\n\n剪枝基于统计显著性，保留真正高频的子词，\n词表质量优于 BPE 的贪心合并。\n\n分词歧义建模\n\nUnigram 可量化分词歧义程度，有助于处理\n形态复杂语言（芬兰语、土耳其语等）。\n\nUnigram 在 SentencePiece 框架下使用，代表模型：T5 / mT5 / ALBERT\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 22,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00017"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\n四种方案横向对比\n\n对比维度\n\nBPE\n\nBBPE\n\nWordPiece\n\nUnigram\n\n初始词表\n\n256 字节\n\n大词表剪枝\n\n合并策略\n\n频次最大\n\n频次最大\n\n似然最大\n\nEM + 剪枝\n\nUNK 风险\n\n零 UNK\n\n分词确定性\n\n可概率化\n\n多语言友好\n\n代表模型\n\nGPT-2\n\nLLaMA\n\nBERT\n\n没有绝对最优：选择取决于目标语言、词表大小要求和下游任务\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 23,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00018"
+  },
+  {
+    "content": "第四部分  ·  其他主流分词方案\n\n主流 LLM 使用的 Tokenizer\n\nGPT-4 / GPT-3.5\n\n分词器：BBPE (cl100k_base)\n\n词表：100,256  |  英文优化\n\nLLaMA 2/3\n\n分词器：SentencePiece + BPE\n\n词表：32,000  |  多语言\n\nQwen 2.5\n\n分词器：BBPE (tiktoken)\n\n词表：151,936  |  中英优化\n\nBERT / RoBERTa\n\n分词器：WordPiece\n\n词表：30,522  |  英文为主\n\nT5 / mT5\n\n分词器：SentencePiece + Unigram\n\n词表：32,128  |  101 语言\n\nGemma 2\n\n分词器：SentencePiece + BPE\n\n词表：256,000  |  多语言\n\n趋势：词表向 100k~256k 扩大 + BBPE 主导 + 多语言均衡\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 24,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00019"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\nToken Fertility：不同语言的效率差异\n\nFertility = 一个自然语言词汇需要多少个 token 来表示\n\nGPT-3.5 词表下各语言 Fertility 估算（越低越好）\n\nEnglish\n\n1.2x\n\nGerman\n\n1.5x\n\n形态变化多\n\nChinese\n\n2.5x\n\n英文词表训练\n\nArabic\n\n3.1x\n\n形态复杂\n\nJapanese\n\n2.8x\n\n混合字符系统\n\nFertility 越高 = 相同语义需要更多 token = 上下文利用率更低 = 推理成本更高\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 26,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00020"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\n词表平衡策略\n\n多语言语料采样（Upsampling）\n\n训练 tokenizer 时按语言比例采样，提高低资源\n语言在语料中的权重，使其字节/子词模式被充分合并。\n\nmBERT: 104 语言，低资源语言 upsampling 50x\n\n扩大词表（Large Vocab）\n\n增加 BPE/BBPE 合并次数，将更多高频子词单元\n纳入词表，降低各语言 fertility。\n\nQwen: 151,936  |  Gemma: 256,000\n\n语言特定词表扩展\n\n在预训练词表基础上追加目标语言高频词汇，\n专为特定语言提升效率，无需重新训练整个词表。\n\nLLaMA-2 Chinese: 追加 20k 汉字 token\n\n分层词表（Hierarchical）\n\n为不同脚本系统维护独立子词表，按语言路由\ntoken，解决不同脚本体系间的冲突。\n\n研究阶段，尚未广泛部署\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 27,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00021"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\n中文分词的特殊性\n\n为什么中文是挑战？\n\n无空格边界\n\n中文词语之间没有空格，BPE 无法依赖\n空格确定词边界，切分歧义大。\n\n字符集巨大\n\n常用汉字 3500+，全集 8万+，远超\n英文 26 字母，初始字符词表极大。\n\n字节序列长\n\n每个汉字 UTF-8 编码 3 字节，字节级\n初始表示比英文长 3 倍。\n\n实际 Token 效率对比\n\n同一句话（'人工智能改变世界'）\n\nLLaMA-1 (英文词表)\n\n人|工|智|能|改|变|世|界\n= 8 tokens\n\nQwen 2.5 (中文优化)\n\n人工智能|改变|世界\n= 3 tokens\n\nChatGLM (中文专用)\n\n人工智能|改变世界\n= 2 tokens\n\n专用词表可将中文 fertility 从 8x 降至 2~3x，显著提升效率\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 28,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00022"
+  },
+  {
+    "content": "第五部分  ·  多语言挑战与优化\n\n工程实践建议\n\n英文单语言任务\n\n直接使用 GPT-4 / LLaMA 词表（cl100k 或 llama BPE），无需定制\n\n中文 / 双语场景\n\n优先选择 Qwen / ChatGLM 词表，或在 LLaMA 基础上扩展 2~3万 汉字 token\n\n多语言场景\n\n使用 mBERT / mT5 / Gemma 词表；确认训练数据覆盖目标语言，评估 fertility\n\n低资源语言\n\n用 SentencePiece 在目标语言数据上单独训练，再与基础词表合并\n\n评估 tokenizer 质量的核心指标：各目标语言的 Fertility + OOV 率\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 29,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00023"
+  },
+  {
+    "content": "第六部分  ·  Tokenizer 工程实践\n\nHuggingFace tokenizers 实战\n\n两种使用方式\n\n加载已有模型词表\n\nfrom transformers import AutoTokenizer\ntok = AutoTokenizer.from_pretrained(\n  'Qwen/Qwen2.5-7B')\nids = tok.encode('人工智能改变世界')\n# [104, 220, 14990, ...]\ntok.decode(ids)  # 还原文本\n\n常用属性查询\n\ntok.vocab_size      # 词表大小\ntok.all_special_tokens\ntok.convert_tokens_to_ids(['<s>'])\n\n训练自定义 BPE 词表\n\nfrom tokenizers import (\n  Tokenizer, models, trainers,\n  pre_tokenizers)\n\ntok = Tokenizer(models.BPE())\ntok.pre_tokenizer = (\n  pre_tokenizers.ByteLevel())\n\ntrainer = trainers.BpeTrainer(\n  vocab_size=32000,\n  special_tokens=[\n    '<unk>','<s>','</s>'])\ntok.train(['corpus.txt'], trainer)\ntok.save('my_tokenizer.json')\n\ntokenizers 库（Rust 实现）比 Python 快 20~100x，适合大规模语料训练\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 31,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00024"
+  },
+  {
+    "content": "第六部分  ·  Tokenizer 工程实践\n\n词表大小的权衡\n\n极端情况的代价\n\n词表过小（< 8k）\n\n• 高 fertility：简单词需多 token 表示\n\n• 序列变长：上下文窗口利用率低\n\n• 训练慢：模型要处理更长序列\n\n词表过大（> 300k）\n\n• Embedding 矩阵占用内存激增\n\n• 稀疏词难以学到好的表示\n\n• 推理时 softmax 分母变大\n\n主流模型词表大小\n\nBERT-base\n\n30,522\n\n早期，较小\n\nGPT-2\n\n50,257\n\n首代 GPT\n\nLLaMA-2\n\n32,000\n\n高效多语\n\nGPT-4 (cl100k)\n\n100,256\n\n当前主流\n\nQwen 2.5\n\n151,936\n\n中英优化\n\nGemma 2\n\n256,000\n\n超大词表\n\n经验值：英文单语言约 32k~50k；多语言/中文场景约 100k~256k\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 32,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00025"
+  },
+  {
+    "content": "第六部分  ·  Tokenizer 工程实践\n\n本课总结\n\n技术演进路线\n\n词级\n分词\n\n高 OOV\n\nBPE\n字符\n\n低 OOV\n\nBBPE\n字节\n\n零 UNK\n\nWP/SP\n统一\n\n多框架\n\n大词表\n多语\n\n100k+\n\n核心要点回顾\n\n子词是最佳平衡点\n\n在词表大小、序列长度、覆盖率三者间取得最佳平衡，是现代 LLM 的基础。\n\nBBPE 是零 UNK 的保证\n\n以 256 字节为初始词表，任意 Unicode 文本均可表示，已成主流大模型首选。\n\n词表大小影响多语言公平性\n\n扩大词表可降低 fertility，专用词表扩展是提升中文等非英语效率的常见手段。\n\nTokenizer 选型影响模型效果\n\n选择 tokenizer 时需评估目标语言 fertility 和 OOV 率，不应直接沿用英文词表。\n\n从字符到字节，从频次到概率：Tokenizer 的演进始终在覆盖率、效率与公平性之间寻求平衡\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 33,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "tokenizer原理"
+    },
+    "chunk_id": "tokenizer原理_00026"
+  },
+  {
+    "content": "预训练模型演进史\n\n从 ELMo 到 ChatGPT\n\n那些改变 NLP 格局的模型、曾经的热门思路，以及它们最终的命运\n\n2013\n\nWord2Vec\n\n2015\n\nSeq2Seq\n\n2017\n\nTransformer\n\n2018\n\nBERT/GPT\n\n2019\n\nBERT变体\n\n2020\n\nGPT-3\n\n2022\n\nChatGPT\n\n8 个里程碑  ·  29+ 页  ·  哪些思想活下来，哪些被历史淘汰\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 1,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00000"
+  },
+  {
+    "content": "Part 01  词向量时代的局限\n\nWord2Vec / GloVe：静态词向量时代\n\n核心思路\n\nWord2Vec（2013，Google）\n\n预测上下文词，训练稠密词向量\n两种模式：CBOW 和 Skip-gram\n\nGloVe（2014，Stanford）\n\n全局共现矩阵分解，兼顾\n局部上下文与全局统计信息\n\n共同成就\n\n稠密低维向量大幅优于 one-hot\n词语类比推理：king - man + woman = queen\n\n核心问题：静态向量\n\n\"bank\" 这个词，不管什么语境，向量完全相同\n\nsent1 = \"went to the bank\"\n      # 银行\n\nsent2 = \"sat on the river bank\"\n      # 河岸\n\n# 两句中 bank 向量完全一样!\n\n一词一向量：无视上下文\n预训练仅限词向量，深层表征靠任务\n数据从头学——数据少则效果差\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 3,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00001"
+  },
+  {
+    "content": "Part 01  词向量时代的局限\n\n为什么需要动态 / 上下文敏感的表征？\n\n多义词歧义\n\n\"bank\" \"spring\" \"fly\"\n不同语境含义完全不同\n静态向量无法区分\n\n句法语义理解\n\n\"I ate the cake\" vs\n\"The cake was eaten\"\n词序影响语义，词袋无法捕捉\n\n任务特异性强\n\n每任务需从头大量训练\n数据少时容易过拟合\n泛化能力受限\n\n当时的解法（2015–2017）\n\n• Seq2Seq + Attention（2015）\n\n注意力机制聚焦关键词，翻译/摘要效果大幅提升\n\n• 双向 LSTM（biLSTM）\n\n正向+反向拼接，捕捉左右上下文；但串行慢，每任务独立训练\n\n• 核心局限\n\n深层表征仍依赖任务数据——数据少=效果差；亟需通用上下文预训练\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 4,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00002"
+  },
+  {
+    "content": "Part 02  ELMo——动态表征的破冰者\n\nELMo：从静态到动态的关键一步\n\n核心设计\n\n双向语言模型（biLM）\n\n正向 LSTM 预测下一词\n反向 LSTM 预测上一词\n拼接得到双向上下文表征\n\n多层表征加权融合\n\n底层：捕捉词法/句法信息\n高层：捕捉语义信息\n下游任务学习各层权重\n\n作为特征注入下游模型\n\n冻结 ELMo 参数，提取向量\n作为额外特征送入任务模型\n\n动态表征示例\n\n# 句子 1\n\"He deposited at the bank\"\n# bank -> [银行义向量]\n\n# 句子 2\n\"We fished at the river bank\"\n# bank -> [河岸义向量]\n\n# 相同词，不同向量！\n\n同一个词，不同上下文 → 不同向量\n这在 Word2Vec 时代是不可能的！\n\nSQuAD +4.7%   NER +0.7%   SST情感 +1.0%\n（相比 ELMo 之前的 SOTA）\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 6,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00003"
+  },
+  {
+    "content": "Part 02  ELMo——动态表征的破冰者\n\nELMo 的历史地位：开创者，而非终点\n\n留下的遗产\n\n开创预训练+迁移范式\n\n证明『大语料预训练，小任务迁移』\n这一路线行得通，影响了\nBERT 和 GPT 的整体设计思路\n\n上下文感知可行性验证\n\n首次在 NLP 大规模验证了\n动态上下文表征的有效性\n\n分层语义的启发\n\n不同层捕捉不同粒度信息的思想\n影响了后续 BERT 层分析研究\n及 probing 实验方法论\n\n局限与最终命运\n\nLSTM 串行，速度慢\n\n无法并行计算，训练和推理\n效率远低于 Transformer\n\n特征注入，非端到端\n\n预训练特征作为额外输入注入\n而非整体 fine-tune，灵活性差\n\n深度受限，表征上限低\n\n通常只用 2 层 LSTM\n表征能力明显低于\n深层 Transformer\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 7,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00004"
+  },
+  {
+    "content": "Part 03  GPT——Transformer 时代的开启\n\nGPT：押注单向 Transformer，统一 fine-tune 范式\n\n核心设计\n\nTransformer Decoder（单向）\n\n每个 token 只能看左边\n因果注意力掩码确保自回归\n12 层，117M 参数\n\n预训练：下一词预测\n\nP(w_t | w_1,...,w_{t-1})\n最自然的无监督学习目标\n在 BooksCorpus 上预训练\n\n统一 fine-tune 方案\n\n所有任务改造为序列输入\n在同一模型上 fine-tune\n无需任务专用架构\n\n任务输入改造方案\n\n# 分类\n[Start] text [Extract]\n\n# 文本蕴含\n[Start] premise $ hypo [Extract]\n\n# 问答\n[Start] ctx $ answer_k [Extract]\n\n所有任务 → 同一模型，统一输入格式\n\nELMo\n\n特征注入 · LSTM · 非端到端\n\nGPT\n\n端到端 ft · Transformer · 统一\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 9,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00005"
+  },
+  {
+    "content": "Part 03  GPT——Transformer 时代的开启\n\nGPT 的历史地位：方向选对了，时机差了点\n\n确立的贡献\n\nTransformer 是首选主干\n\n彻底替代 LSTM，Transformer\n成为预训练模型的标准架构\n\n语言模型是通用预训练目标\n\nNext token prediction 简单有效\nGPT-2/3/4 全部沿用此目标\n\n统一 fine-tune 范式\n\n一模型多任务，而非\n为每任务重新设计架构\n下游适配成本大幅降低\n\n当时的局限\n\n单向模型的天然缺陷\n从左到右只看\"过去\"\n对于理解/分类任务\n双向上下文信息更有价值\n\n历史评价\n\nGPT 发布仅两个月后，BERT 横空出世，在所有理解任务上大幅超越 GPT，让 GPT 的光芒黯淡了将近两年。\n\n但 OpenAI 坚持了生成式路线，而这个看似'错误'的选择，最终通向了 GPT-2、GPT-3，以及 ChatGPT。\n\n生成式 vs 理解式，是 2018 年 NLP 最重要的技术分歧。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 10,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00006"
+  },
+  {
+    "content": "Part 04  BERT——双向理解的集大成\n\nBERT：两个关键预训练目标\n\n任务一：Masked LM（MLM）\n\n随机遮盖 15% 的 token，让模型预测被遮住的词。\n真正实现了双向上下文建模。\n\n输入: \"The cat [MASK] on the mat\"\n\n预测: [MASK] -> \"sat\"\n\n同时看左边\"The cat\"\n和右边\"on the mat\"\n\n遮盖策略（15% token）\n\n80% 替换为 [MASK]\n10% 替换为随机词\n10% 保持原词不变（减少训练-推理不一致）\n\n任务二：Next Sentence Prediction（NSP）\n\n判断句子 B 是否是句子 A 的真实下一句。\n目标是帮助模型理解句间关系。\n\n[CLS] Sentence A [SEP] Sentence B\n\n正例（50%）:\n  A: \"He went to the store.\"\n  B: \"He bought milk.\"  -> IsNext\n\n负例（50%）:\n  A: \"He went to the store.\"\n  B: \"The sky is blue.\"  -> NotNext\n\n后来被质疑：RoBERTa 直接去掉 NSP，效果反而更好。\nNSP 任务太简单，对模型没有实质提升。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 12,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00007"
+  },
+  {
+    "content": "Part 04  BERT——双向理解的集大成\n\nBERT 为何横扫 NLP 榜单？\n\nBERT-Base\n\n12 层 / 768 维 / 110M 参数\n\nBERT-Large\n\n24 层 / 1024 维 / 340M 参数\n\n预训练数据\n\nBooksCorpus + Wikipedia（16GB）\n\n下游任务适配方式\n\n句子分类\n\n取 [CLS] 向量 → 分类层 fine-tune\n\n命名实体识别\n\n每个 token 向量 → 序列标注\n\n问答（SQuAD）\n\n输出 span 的起止位置\n\n句对任务\n\n[CLS] A [SEP] B → 关系分类\n\n发布时的成绩单\n\n• GLUE 综合榜     +7.7%\n\n• SQuAD v1.1      +1.5%\n\n• SQuAD v2.0      +5.1%\n\n• SWAG 常识推理  +27.1%\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 13,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00008"
+  },
+  {
+    "content": "Part 04  BERT——双向理解的集大成\n\nBERT 的争议：并非完美\n\n三大争议与局限\n\n训练-推理不一致\n\n训练时出现 [MASK]，推理时没有\n模型在 fine-tune 阶段从未见过\n真实的 [MASK] token\n\nNSP 任务无效\n\n后来 RoBERTa 证明直接去掉 NSP\n效果反而更好——任务太简单\n模型靠话题不一致就能判断\n\n不擅长生成\n\nEncoder-only 双向结构不适合\n自回归文本生成，无法做\n续写、翻译、摘要等任务\n\n历史影响\n\n2019\n\nRoBERTa、ALBERT、XLNet 等大量\nBERT 变体涌现，试图修复其缺陷\n\n2020\n\n在工业界大规模落地：搜索排序、\n问答系统、文本分类标配\n\nEncoder-only 模型在理解任务\n（如文本嵌入、分类）仍有优势\n但生成式趋势已完全主导大模型\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 14,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00009"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nRoBERTa（2019, Facebook）：把 BERT 训练好\n\n核心改动\n\n去掉 NSP 任务\n\n只保留 MLM，证明 NSP\n对模型没有实质帮助\n\n更长训练 + 更大 batch\n\n训练步数 10x、batch 8x\n数据量增加至 160GB\n\n动态 Masking\n\n每次送入不同的 mask 序列\n而非静态预生成，防过拟合\n\n更长序列\n\n从 512 → 全程 512\n（原 BERT 有部分 128 步）\n\n核心结论\n\n\"BERT 训练严重不足——更多数据、更长训练、更大 batch，就能大幅超越原始 BERT，无需改架构。\"\n\n# GLUE 榜单（相比 BERT-Large）\nRoBERTa-Large: 88.5  (+2.2)\n\n# SQuAD 2.0\nRoBERTa:  86.8  vs  BERT: 83.1\n\n历史评价：工程调参的胜利。'好好训练'这条原则至今有效，影响了后来所有大模型的训练策略\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 16,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00010"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nALBERT（2019, Google）：让 BERT 变瘦\n\n三大压缩技术\n\n词嵌入因子分解\n\n词表大 embedding (V×H) 分解为\n两个小矩阵 (V×E + E×H)\nE << H，大幅减少词表参数\n\n跨层参数共享\n\n所有 Transformer 层共享同一套权重\n参数量从 O(L) 降至 O(1)\n但前向传播层数不变\n\nSOP 替换 NSP\n\nSentence Order Prediction\n预测两段是否顺序互换\n比 NSP 更难，更有效\n\n效果与尴尬\n\n# 参数量对比\nBERT-Large:   340M\nALBERT-Large: 18M  (参数 -95%!)\n\n# 但推理速度...\nALBERT-Large: 与 BERT-Large 一样慢\n(层数相同，只是共享了权重)\n\n核心矛盾：\n参数少了，但推理速度没有变快。\n大家要的是'又小又快'，\n不是'小但一样慢'。\n\n历史评价：参数共享思路在小模型场景仍有借鉴意义，但主流大模型不采用。SOP 思路被证明比 NSP 好。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 17,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00011"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nXLNet（2019, CMU + Google）：排列语言模型\n\n核心思想\n\n排列语言模型（PLM）\n\n对输入序列的所有可能排列进行训练\n每次选一种排列，用自回归方式预测\n理论上实现了双向+自回归的结合\n\n# 句子 \"A B C D\"\n# 其中一种排列：3-1-4-2\n# 预测顺序：C -> A -> D -> B\n# 每次预测都能看到\"整句\"\n\nTransformer-XL 相对位置编码\n\n片段循环机制 + 相对位置编码\n有效处理超长文本，位置编码解耦内容\n\n\"理论很美，工程很复杂\"\n\n排列语言模型训练极其复杂，难以实现，实际效果的提升并不总能弥补工程代价。\n\n被历史淘汰：\n排列 LM 实现复杂，GPT 的简单自回归\n更符合'scale up'的趋势，大模型时代\nXLNet 的路线基本无人跟进。\n\n但相对位置编码留下了：\nTransformer-XL 的相对位置编码\n思想影响了 RoPE、ALiBi 等编码方式\n成为长上下文模型的核心技术\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 18,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00012"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nDistilBERT & BART（2019）：两种互补路线\n\nDistilBERT — 蒸馏出小 BERT\n\n知识蒸馏（Knowledge Distillation）：\n用大 BERT 作为'老师'，训练一个更小的'学生'模型\n\n# 效果对比（vs BERT-Base）\n层数:  12 -> 6  (-50%)\n参数:  110M -> 66M  (-40%)\n速度:  1x -> 1.6x  (快 60%)\n性能:  保留 97% GLUE 分数\n\n遗产：知识蒸馏成为移动端/边缘设备\n部署小模型的标准手段，至今广泛应用\n\nBART — 桥接理解与生成\n\nEncoder-Decoder + 降噪预训练\n用各种方式破坏文本，训练模型重建\n\n# 预训练噪声方式\n- Token Masking (like BERT)\n- Token Deletion\n- Text Infilling\n- Sentence Permutation\n- Document Rotation\n\n遗产：Encoder-Decoder+降噪的框架\n直接影响了 T5 的设计理念\n\n这两个模型代表了 2019 年 BERT 生态的两个方向：DistilBERT 走向更小更快的部署端，BART 走向更强的生成端。都在各自方向上留下了可用的成果。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 19,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00013"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nELECTRA（2020, Google）：判别器替代掩码预测\n\n核心思想：替换 token 检测\n\nGenerator（生成器）\n小型 MLM 模型，将某些 token 替换\n为合理但错误的词\n\nDiscriminator（判别器）\n判断每个 token 是否被替换\n即 ELECTRA 真正学习的模型\n\n# 原始: \"The chef cooked the meal\"\n# Generator 替换:\n  \"The chef ate the meal\"\n#           ^^^替换了 cooked->ate\n# Discriminator 任务:\n#  判断每个位置是否被替换\n\n效率优势\n\nMLM 只对被遮盖的 15% token 计算损失\nELECTRA 对所有 token 计算损失\n训练信号利用率：15% → 100%\n\n# 同等算力效果对比\nELECTRA-Small vs BERT-Base:\n  GLUE: 79.9 vs 79.6  (小模型胜)\nELECTRA-Base vs RoBERTa-Large:\n  GLUE: 88.8 vs 88.5  (更少算力胜)\n\n历史评价：理念很好，算力效率确实更高。但大模型\n时代转向生成式，Encoder 路线式微，\nELECTRA 也随之逐渐淡出视野。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 20,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00014"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nBERT 变体时代：哪些思想活下来？\n\n2019–2020 年的爆发式创新，验证了哪些路线，又淘汰了哪些\n\n活下来 / 影响深远\n\n被边缘化 / 历史淘汰\n\n好好训练\n\nRoBERTa 证明：优化训练比改架构更重要\n\n知识蒸馏\n\nDistilBERT 开创：小模型部署标准方法\n\n相对位置编码\n\nXLNet → RoPE/ALiBi，长上下文建模核心\n\n生成式预训练\n\nBART 影响 T5，Encoder-Decoder 框架\n\nNSP 任务\n\nRoBERTa 证伪：去掉 NSP 效果反而更好\n\n层权重共享\n\nALBERT 路线：参数少但推理没变快\n\n排列语言模型\n\nXLNet：理论美但工程复杂，无人跟进\n\nELECTRA 判别式\n\nEncoder 路线被生成式全面取代\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 21,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00015"
+  },
+  {
+    "content": "Part 06  GPT-2——\"不发布\"的震惊\n\nGPT-2：把语言模型放大，然后什么都不做\n\n核心设计\n\n规模大幅扩大\n\n参数 1.5B（GPT 的 13 倍）\n48 层 Transformer Decoder\nWebText 数据（Reddit 高赞链接）\n\nZero-shot 多任务\n\n无需 fine-tune，直接通过\n自然语言提示完成各类任务\n翻译、问答、摘要均有效\n\n架构几乎不变\n\n仍是 Decoder-only 自回归\n主要改动：Layer Norm 位置调整\n放大比改架构更有效\n\nZero-shot 能力示例\n\n# 翻译（无专门训练）\nPrompt: \"Translate to French:\nThe cat sat on the mat\"\nOutput: \"Le chat etait assis\"\n\n# 问答（无专门训练）\nPrompt: \"Q: What is 2+2? A:\"\nOutput: \"4\"\n\n规模对比\n\nGPT (2018)\n\n117M\n\n12 层\n\nBERT-Large\n\n340M\n\n24 层\n\nGPT-2 XL (2019)\n\n1,542M\n\n48 层\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 23,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00016"
+  },
+  {
+    "content": "Part 06  GPT-2——\"不发布\"的震惊\n\nGPT-2：历史性风波与深远遗产\n\n\"不安全，不发布\"事件\n\n2019 年 2 月，OpenAI 发布 GPT-2 时，\n以\"AI 安全风险\"为由，只放出了小版本，\n拒绝发布完整的 1.5B 版本。\n\n这是 AI 领域首次因'生成内容危险'\n而主动限制发布的重大事件，\n引发了关于 AI 开放 vs 安全的激烈讨论。\n\n反思：\n\n几个月后，OpenAI 陆续释出完整模型\n后来研究者发现 GPT-2 并没有当初\n预期的那么'危险'\n但这场争论成为 AI 治理讨论的起点\n\n技术遗产\n\n证明了 Scale 的力量\n\n扩大规模 + 不改架构 = 能力涌现\n为 GPT-3 的方向提供了信心\n\nZero-shot 成为目标\n\n无需任务标注，靠提示词就能完成任务\n成为后来 In-context Learning 的先驱\n\n开启 AI 安全讨论\n\nAI 生成内容的风险首次被认真对待\n影响了 OpenAI 后来的产品策略\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 24,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00017"
+  },
+  {
+    "content": "Part 07  T5 与 GPT-3——大力出奇迹\n\nT5（2019, Google）：一切皆文本\n\n核心思想\n\n\"Text-to-Text Transfer Transformer\"\n所有 NLP 任务统一表示为：\n输入文本 → 输出文本\n\n# 分类\n\"sst2 sentence: I love it.\"\n-> \"positive\"\n\n# 翻译\n\"translate English to German: Hi\"\n-> \"Hallo\"\n\n# 摘要\n\"summarize: The cat ...\"\n-> \"A cat sat...\"\n\n系统性研究\n\nT5 论文本身是一篇大规模系统研究\n比较了各种预训练策略：\n\n• 预训练目标：MLM vs 语言模型 vs 去噪\n\n• 架构：Encoder-only vs Decoder-only vs Enc-Dec\n\n• 数据集：大小 vs 质量的取舍\n\n• Fine-tune 策略：多任务 vs 单任务\n\n历史遗产：统一 text-to-text 框架的思想超前\n影响了 FLAN、Instruction Tuning\n以及后来的 Seq2Seq 系列模型\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 26,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00018"
+  },
+  {
+    "content": "Part 07  T5 与 GPT-3——大力出奇迹\n\nGPT-3（2020, OpenAI）：175B 参数，能力涌现\n\n175B\n\n参数量\n\n96 层\n\nTransformer 深度\n\n300B\n\n训练 token\n\nGPT-2 ×117\n\n参数倍数\n\n核心能力：In-context Learning\n\n# Few-shot（无梯度更新）\n\"Translate to French:\nhappy -> heureux\ncold -> froid\ncat -> \"  # 模型填: chat\n\n# Zero-shot\n\"Q: What is the capital of France?\nA:\"  # 模型填: Paris\n\n上下文学习（ICL）：在提示里给几个例子，\n模型无需梯度更新就能完成新任务\n\n规模律与范式转变\n\nScaling Laws 确立\n\n损失与参数量、数据、算力\n呈现幂律关系——更大 = 更好\n\n涌现能力\n\n小模型没有、大模型突然出现\n思维链推理、算术、代码等能力\n\nFine-tune 的终结？\n\n靠提示词完成多任务，减少标注依赖\n但对齐问题由此开始凸显\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 27,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00019"
+  },
+  {
+    "content": "Part 07  T5 与 GPT-3——大力出奇迹\n\nGPT-3 之后：兴奋与困惑并存\n\n令人兴奋的\n\n通用性\n\n一个模型写代码、写诗、做翻译\n首次展示了真正的通用 AI 苗头\n\nPrompt Engineering\n\n如何写提示词成为新技能\n催生了一整套 prompt 设计方法论\n\n商业化潜力\n\nOpenAI 开放 API，大量初创公司\n基于 GPT-3 构建产品\n\n遗留的困惑\n\n对齐问题\n\n模型会撒谎、有偏见、有时\n生成有害内容——如何控制？\n\n推理成本巨大\n\n175B 模型推理极其昂贵\n无法直接产品化，需要蒸馏压缩\n\n可解释性缺失\n\n模型为何会这样输出？\n没有人真正知道——黑箱问题\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 28,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00020"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\nInstructGPT（2022）：让模型听懂人话\n\nGPT-3 的根本问题\n\nGPT-3 的训练目标是『预测下一个 token』\n而不是『完成用户的意图』\n\n结果：能生成流畅文本，但常常\n答非所问、撒谎、有害内容\n\nRLHF 三步骤\n\n① 监督微调（SFT）\n\n人工标注示范回答，对 GPT-3 做 fine-tune\n\n② 奖励模型（RM）\n\n人工对模型回答排序，训练奖励分数预测器\n\n③ PPO 强化学习\n\n用奖励模型评分，PPO 算法优化 SFT 模型\n\n效果对比\n\n# 用户偏好实验（人类评估）\nGPT-3 (175B)  vs  InstructGPT (1.3B)\n\n人类更偏好 InstructGPT：85%\n\n# 更小的模型，更好的\"有用性\"\n→ Scale 不是唯一答案\n\n核心意义\n\nInstructGPT 第一次系统性地解答了：\n如何让模型的输出与人类意图对齐？\n\n『对齐』从此成为大模型的核心议题\nHHH 原则（Helpful · Honest · Harmless）\n成为后续所有对话模型的设计纲领\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 30,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00021"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\nChatGPT（2022.11）：亿级用户的 AI 时刻\n\n5 天\n\n100 万用户\n\n2 个月\n\n1 亿月活\n\n2022.11.30\n\n正式上线日\n\n史上最快\n\n用户增长产品\n\n技术本质：并非全新架构\n\nGPT-3.5 + RLHF\n\n基础模型是 GPT-3.5（code-davinci-002）\n在 InstructGPT 的对齐方法上迭代\n\n对话格式的创新\n\n多轮对话拼接为上下文\n[System][Human][Assistant] 格式\n\n工程与产品的胜利\n\n流式输出 + 简洁界面 + 免费开放\n技术成熟度与产品时机的双重红利\n\n为什么引爆了世界？\n\n门槛为零\n\n无需写代码，自然语言对话即可\n\n全能感\n\n写邮件、写代码、解题……样样能用\n\n即时反馈\n\n输出连贯流畅，像真人一样回答\n\n免费开放\n\nOpenAI 开放公众测试，病毒式传播\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 31,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00022"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\nGPT-4 之后：新时代的几个关键词\n\nChatGPT 之后，大模型时代正式开启。以下是继续演进的几个核心方向：\n\n多模态\n\nGPT-4V、Gemini 等\n打通文字、图像、音频\n\n开源生态\n\nLLaMA、Mistral 推动\n开源模型迅速追赶闭源\n\n长上下文\n\n从 4K 到 100K+ token\n突破 Attention 的位置限制\n\n工具调用/Agent\n\n模型调用外部 API/工具\n走向可执行的自主 Agent\n\n推理能力强化\n\no1/R1 系列推理模型\n慢思考 + 长链式推理\n\n对齐技术迭代\n\nDPO、RLHF 变体持续改进\n减少有害内容、提升可控性\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 32,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00023"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\n全景回顾：从 Word2Vec 到 ChatGPT，什么留下来了？\n\n十年演进中，最终活下来的 7 条核心思想\n\n2013\n\n稠密词向量\n\nWord2Vec → 词嵌入是一切表征的基础\n\n2018\n\nTransformer + 自回归 LM\n\nGPT 路线 → GPT-2/3/4/ChatGPT 全系列根基\n\n2018\n\n预训练 + fine-tune 范式\n\nBERT/GPT → 大数据预训练，小数据迁移\n\n2019\n\n更大规模 + 充分训练\n\nRoBERTa → 规模与数据质量比架构改进更重要\n\n2019\n\nText-to-Text 统一格式\n\nT5 → Instruction tuning 的思想先驱\n\n2020\n\nIn-context Learning\n\nGPT-3 → 提示词工程、zero/few-shot 范式\n\n2022\n\nRLHF 对齐\n\nInstructGPT → 有用、无害、诚实的对话模型\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 33,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00024"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\n被历史淘汰的思路，与最终的总结\n\n被历史淘汰的路线\n\nNSP 任务\n\nRoBERTa 证伪：句子关系预测任务无效\n\nLSTM 架构\n\nELMo 的路线：被 Transformer 全面取代\n\n层权重共享\n\nALBERT：参数少但推理没变快\n\n排列语言模型\n\nXLNet：理论美，工程复杂，无人跟进\n\nEncoder-only\n\nBERT 路线式微，生成式主导大模型\n\n最终的思考\n\n这段历史告诉我们：\n\n1. 简单 + 可扩展 > 理论优美\n   自回归 LM 赢了所有复杂变体\n\n2. 规模本身就是能力\n   Scale 带来的涌现超出所有预期\n\n3. 对齐与安全不是附加题\n   GPT-2 的争议最终催生了 RLHF\n\nChatGPT 不是终点\n\n它是过去十年积累的集大成：\n预训练范式 + 规模定律 + 对齐技术\n三者同时成熟，才有了那个震撼世界的聊天机器人。\n下一个十年，故事还在继续。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 34,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00025"
+  }
+]

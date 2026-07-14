@@ -1,0 +1,35 @@
+# ============================================================
+# RAG 实战项目依赖
+# 安装：pip install -r requirements.txt
+# ============================================================
+
+# ── 环境变量管理 ──
+python-dotenv>=1.0.0
+
+# ── PDF 解析 ──
+pdfplumber>=0.10.0          # 表格提取
+pymupdf>=1.23.0             # 即 fitz，文字+字体信息提取
+
+# ── PPT 解析 ──
+python-pptx>=0.6.23         # PowerPoint 文件解析
+
+# ── Embedding 模型 ──
+modelscope>=1.18.0          # 从 ModelScope 下载模型
+sentence-transformers>=2.6.0 # 本地模型推理
+transformers>=4.44.0        # Qwen3 系列模型依赖
+torch>=2.1.0                # 深度学习后端
+huggingface_hub>=0.23.0     # 模型下载工具
+
+# ── 向量检索 ──
+faiss-cpu>=1.7.4            # FAISS 向量索引
+
+# ── 关键词检索（BM25）──
+rank_bm25>=0.2.2
+jieba>=0.42.1
+
+# ── LLM 接口 ──
+openai>=1.30.0              # OpenAI 兼容接口（DashScope 等）
+
+# ── 工具 ──
+numpy>=1.24.0
+tqdm>=4.66.0
