@@ -1,0 +1,22 @@
+[
+  {
+    "question": "RAG 的基本流程包括哪些步骤？",
+    "expected_source": "01_RAG基础.md"
+  },
+  {
+    "question": "BM25 属于什么检索方法？",
+    "expected_source": "02_向量检索.md"
+  },
+  {
+    "question": "向量数据库主要用来做什么？",
+    "expected_source": "02_向量检索.md"
+  },
+  {
+    "question": "vLLM 为什么能够提高吞吐量？",
+    "expected_source": "03_大模型推理部署.md"
+  },
+  {
+    "question": "量化有什么作用？",
+    "expected_source": "03_大模型推理部署.md"
+  }
+]
