@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReAct Financial Agent — 多轮对话</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #1a1d27;
+    border-bottom: 1px solid #2d3148;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 17px; font-weight: 600; color: #a78bfa; }
+  header .subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .session-pill {
+    font-size: 12px;
+    color: #94a3b8;
+    background: #12141c;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  .ghost-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #3d4163;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .ghost-btn:hover { border-color: #7c3aed; color: #a78bfa; }
+
+  .main {
+    flex: 1;
+    max-width: 920px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .mode-toggle { display: flex; gap: 8px; align-items: center; }
+  .mode-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #3d4163;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .mode-btn.active {
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: #fff;
+  }
+
+  #chatLog {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 2px 12px;
+    min-height: 280px;
+  }
+
+  .turn {
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    background: #1a1d27;
+    overflow: hidden;
+  }
+  .user-bubble {
+    padding: 12px 16px;
+    border-bottom: 1px solid #2d3148;
+    background: #151822;
+  }
+  .user-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+  .user-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+
+  .steps { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .step-card {
+    background: #12141c;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .step-badge {
+    background: #2d3148;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 11px;
+    color: #64748b;
+  }
+  .step-body { padding: 0 12px 10px; }
+  .step-body.collapsed { display: none; }
+  .block { border-left: 3px solid; padding-left: 10px; margin-bottom: 8px; }
+  .thought { border-color: #38bdf8; }
+  .action  { border-color: #fbbf24; }
+  .obs     { border-color: #34d399; }
+  .block-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .thought .block-label { color: #38bdf8; }
+  .action  .block-label { color: #fbbf24; }
+  .obs     .block-label { color: #34d399; }
+  .block-content {
+    font-size: 13px;
+    line-height: 1.55;
+    color: #cbd5e1;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .obs .block-content {
+    max-height: 160px;
+    overflow-y: auto;
+    background: #0d1017;
+    border-radius: 4px;
+    padding: 6px 8px;
+  }
+  .tool-pill {
+    display: inline-block;
+    background: #2d1f5e;
+    border: 1px solid #4c1d95;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 12px;
+    color: #a78bfa;
+    font-family: monospace;
+  }
+  .args-code {
+    margin-top: 4px;
+    background: #0f1117;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .fc-note { font-size: 12px; color: #475569; font-style: italic; }
+
+  .final-box {
+    margin: 0 12px 12px;
+    border: 1px solid #4c1d95;
+    border-radius: 8px;
+    padding: 14px;
+    background: #16122a;
+  }
+  .final-box h3 { color: #a78bfa; font-size: 13px; margin-bottom: 8px; }
+  .final-box .answer { font-size: 14px; line-height: 1.75; white-space: pre-wrap; }
+  .meta { margin-top: 8px; font-size: 12px; color: #475569; display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .composer {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip {
+    background: #1e2235;
+    border: 1px solid #2d3148;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #94a3b8;
+    cursor: pointer;
+  }
+  .chip:hover { border-color: #7c3aed; color: #a78bfa; }
+  .input-row { display: flex; gap: 10px; }
+  textarea {
+    flex: 1;
+    background: #0f1117;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    color: #e2e8f0;
+    padding: 10px 12px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 64px;
+    outline: none;
+  }
+  textarea:focus { border-color: #7c3aed; }
+  .send-btn {
+    padding: 0 22px;
+    background: #7c3aed;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .send-btn:disabled { background: #3d4163; cursor: not-allowed; }
+
+  .status-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #151822;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  .status-bar.visible { display: flex; }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid #3d4163;
+    border-top-color: #7c3aed;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty-hint {
+    text-align: center;
+    color: #475569;
+    font-size: 13px;
+    padding: 40px 12px;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>ReAct Financial Agent · 多轮对话</h1>
+    <div class="subtitle">同一会话内追问可指代上文（「它」「那家」「刚才」）</div>
+  </div>
+  <div class="header-actions">
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="manual" onclick="setMode('manual', this)">手写解析</button>
+      <button class="mode-btn" data-mode="fc" onclick="setMode('fc', this)">Function Calling</button>
+    </div>
+    <span class="session-pill" id="sessionInfo">session: 新会话</span>
+    <button class="ghost-btn" onclick="clearSession()">清空历史</button>
+  </div>
+</header>
+
+<div class="main">
+  <div id="chatLog">
+    <div class="empty-hint" id="emptyHint">
+      先问一句完整问题，再追问例如「那五粮液呢？」「两家差多少？」<br>
+      历史只保留问答摘要，不重复塞入整段工具轨迹。
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <div class="spinner"></div>
+    <span id="statusText">正在思考...</span>
+  </div>
+
+  <div class="composer">
+    <div class="examples">
+      <span style="font-size:12px;color:#475569;">追问示例：</span>
+      <span class="chip" onclick="setQuestion(this.textContent)">贵州茅台2023年毛利率是多少？</span>
+      <span class="chip" onclick="setQuestion(this.textContent)">那五粮液呢？同样问2023年毛利率。</span>
+      <span class="chip" onclick="setQuestion(this.textContent)">两家差多少个百分点？</span>
+      <span class="chip" onclick="setQuestion(this.textContent)">宁德时代2023年营业收入是多少？</span>
+    </div>
+    <div class="input-row">
+      <textarea id="question" placeholder="输入问题或追问…"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendQuery()">发送</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentMode = 'manual';
+  let sessionId = localStorage.getItem('rfa_session_id') || null;
+  let isRunning = false;
+
+  function setMode(mode, btn) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function setQuestion(text) {
+    document.getElementById('question').value = text;
+    document.getElementById('question').focus();
+  }
+
+  function updateSessionInfo(turns) {
+    const short = sessionId ? sessionId.slice(0, 8) + '…' : '新会话';
+    const t = (turns == null) ? '' : ` · ${turns} 轮`;
+    document.getElementById('sessionInfo').textContent = `session: ${short}${t}`;
+  }
+  updateSessionInfo(0);
+
+  function setStatus(text, visible) {
+    document.getElementById('statusText').textContent = text;
+    document.getElementById('statusBar').classList.toggle('visible', visible);
+  }
+
+  function setSendEnabled(enabled) {
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = !enabled;
+    btn.textContent = enabled ? '发送' : '运行中…';
+    isRunning = !enabled;
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function createStepCard(stepData) {
+    const card = document.createElement('div');
+    card.className = 'step-card';
+    const header = document.createElement('div');
+    header.className = 'step-header';
+    header.innerHTML = `
+      <span class="step-badge">Step ${stepData.step}</span>
+      <span style="flex:1">${esc(stepData.action)}</span>
+      <span style="color:#64748b;font-size:11px">▼</span>`;
+    const body = document.createElement('div');
+    body.className = 'step-body';
+
+    if (currentMode === 'manual' && stepData.thought) {
+      body.innerHTML += `
+        <div class="block thought">
+          <div class="block-label">Thought</div>
+          <div class="block-content">${esc(stepData.thought)}</div>
+        </div>`;
+    } else if (currentMode === 'fc') {
+      body.innerHTML += `
+        <div class="block thought">
+          <div class="block-label">Thought</div>
+          <div class="fc-note">Function Calling：内部推理不可见</div>
+        </div>`;
+    }
+
+    body.innerHTML += `
+      <div class="block action">
+        <div class="block-label">Action</div>
+        <span class="tool-pill">${esc(stepData.action)}</span>
+        <div class="args-code">${esc(JSON.stringify(stepData.action_input || {}, null, 2))}</div>
+      </div>
+      <div class="block obs">
+        <div class="block-label">Observation</div>
+        <div class="block-content">${esc((stepData.observation || '').replace(/\n{3,}/g, '\n\n').trim())}</div>
+      </div>`;
+
+    header.addEventListener('click', () => body.classList.toggle('collapsed'));
+    card.appendChild(header);
+    card.appendChild(body);
+    return card;
+  }
+
+  async function clearSession() {
+    if (sessionId) {
+      try {
+        await fetch(`/session/${sessionId}/clear`, { method: 'POST' });
+      } catch (_) {}
+    }
+    sessionId = null;
+    localStorage.removeItem('rfa_session_id');
+    document.getElementById('chatLog').innerHTML =
+      '<div class="empty-hint" id="emptyHint">历史已清空，可以开始新的多轮对话。</div>';
+    updateSessionInfo(0);
+  }
+
+  async function sendQuery() {
+    if (isRunning) return;
+    const question = document.getElementById('question').value.trim();
+    if (!question) return;
+
+    const hint = document.getElementById('emptyHint');
+    if (hint) hint.remove();
+
+    const turn = document.createElement('div');
+    turn.className = 'turn';
+    turn.innerHTML = `
+      <div class="user-bubble">
+        <div class="user-label">你</div>
+        <div class="user-text">${esc(question)}</div>
+      </div>`;
+    const steps = document.createElement('div');
+    steps.className = 'steps';
+    turn.appendChild(steps);
+    document.getElementById('chatLog').appendChild(turn);
+    document.getElementById('question').value = '';
+
+    setSendEnabled(false);
+    setStatus('正在连接…', true);
+
+    const startTime = Date.now();
+    let actionStepCount = 0;
+
+    try {
+      const resp = await fetch(`/query/${currentMode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question,
+          max_steps: 10,
+          session_id: sessionId,
+        }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let data;
+          try { data = JSON.parse(line.slice(6)); } catch { continue; }
+
+          if (data.type === 'start') {
+            if (data.session_id) {
+              sessionId = data.session_id;
+              localStorage.setItem('rfa_session_id', sessionId);
+            }
+            updateSessionInfo(data.history_turns);
+            setStatus(`思考中…（已有 ${data.history_turns || 0} 轮上下文）`, true);
+          } else if (data.type === 'action') {
+            actionStepCount++;
+            setStatus(`Step ${data.step}：调用 ${data.action}…`, true);
+            const card = createStepCard(data);
+            steps.appendChild(card);
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } else if (data.type === 'final') {
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            const box = document.createElement('div');
+            box.className = 'final-box';
+            box.innerHTML = `
+              <h3>Final Answer</h3>
+              <div class="answer">${esc(data.answer)}</div>
+              <div class="meta">
+                <span>${actionStepCount} 步工具调用</span>
+                <span>~${elapsed}s</span>
+                <span>${currentMode === 'manual' ? '手写解析' : 'Function Calling'}</span>
+              </div>`;
+            turn.appendChild(box);
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            setStatus('完成', false);
+          } else if (data.type === 'max_steps' || data.type === 'error') {
+            const box = document.createElement('div');
+            box.className = 'final-box';
+            box.style.borderColor = '#7f1d1d';
+            box.innerHTML = `<h3 style="color:#f87171">${esc(data.answer || data.observation || '错误')}</h3>`;
+            turn.appendChild(box);
+            setStatus('', false);
+          } else if (data.type === 'done') {
+            if (data.session_id) {
+              sessionId = data.session_id;
+              localStorage.setItem('rfa_session_id', sessionId);
+            }
+            updateSessionInfo(data.history_turns);
+            setStatus('', false);
+          }
+        }
+      }
+    } catch (err) {
+      const box = document.createElement('div');
+      box.className = 'final-box';
+      box.style.borderColor = '#7f1d1d';
+      box.innerHTML = `<h3 style="color:#f87171">请求失败: ${esc(err.message)}</h3>`;
+      turn.appendChild(box);
+      setStatus('', false);
+    } finally {
+      setSendEnabled(true);
+    }
+  }
+
+  document.getElementById('question').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendQuery();
+    }
+  });
+</script>
+</body>
+</html>
