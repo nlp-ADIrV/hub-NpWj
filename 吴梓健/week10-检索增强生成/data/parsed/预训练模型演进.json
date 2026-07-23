@@ -1,0 +1,4156 @@
+{
+  "source": "C:\\Users\\w9988\\Desktop\\week10检索增强生成\\week10 检索增强生成RAG\\homework\\data\\raw_docs\\预训练模型演进.pptx",
+  "file_type": ".pptx",
+  "block_count": 461,
+  "blocks": [
+    {
+      "block_type": "text",
+      "content": "预训练模型演进史",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "从 ELMo 到 ChatGPT",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "那些改变 NLP 格局的模型、曾经的热门思路，以及它们最终的命运",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2013",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Word2Vec",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2015",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Seq2Seq",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2017",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Transformer",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2018",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT/GPT",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2019",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT变体",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2020",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2022",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ChatGPT",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "8 个里程碑  ·  29+ 页  ·  哪些思想活下来，哪些被历史淘汰",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 1,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "词向量时代的局限",
+      "page_num": 2,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Word2Vec · GloVe · 静态表征 · 2013–2017",
+      "page_num": 2,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 2,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 01  词向量时代的局限",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Word2Vec / GloVe：静态词向量时代",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心思路",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Word2Vec（2013，Google）",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "预测上下文词，训练稠密词向量\n两种模式：CBOW 和 Skip-gram",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GloVe（2014，Stanford）",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "全局共现矩阵分解，兼顾\n局部上下文与全局统计信息",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "共同成就",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "稠密低维向量大幅优于 one-hot\n词语类比推理：king - man + woman = queen",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心问题：静态向量",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"bank\" 这个词，不管什么语境，向量完全相同",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "sent1 = \"went to the bank\"\n      # 银行\n\nsent2 = \"sat on the river bank\"\n      # 河岸\n\n# 两句中 bank 向量完全一样!",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "一词一向量：无视上下文\n预训练仅限词向量，深层表征靠任务\n数据从头学——数据少则效果差",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 3,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 01  词向量时代的局限",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "为什么需要动态 / 上下文敏感的表征？",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "多义词歧义",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"bank\" \"spring\" \"fly\"\n不同语境含义完全不同\n静态向量无法区分",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "句法语义理解",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"I ate the cake\" vs\n\"The cake was eaten\"\n词序影响语义，词袋无法捕捉",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "任务特异性强",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "每任务需从头大量训练\n数据少时容易过拟合\n泛化能力受限",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "当时的解法（2015–2017）",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• Seq2Seq + Attention（2015）",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "注意力机制聚焦关键词，翻译/摘要效果大幅提升",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• 双向 LSTM（biLSTM）",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "正向+反向拼接，捕捉左右上下文；但串行慢，每任务独立训练",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• 核心局限",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "深层表征仍依赖任务数据——数据少=效果差；亟需通用上下文预训练",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 4,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELMo——动态表征的破冰者",
+      "page_num": 5,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Peters et al. · AllenNLP · 2018",
+      "page_num": 5,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 5,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 02  ELMo——动态表征的破冰者",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELMo：从静态到动态的关键一步",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心设计",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "双向语言模型（biLM）",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "正向 LSTM 预测下一词\n反向 LSTM 预测上一词\n拼接得到双向上下文表征",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "多层表征加权融合",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "底层：捕捉词法/句法信息\n高层：捕捉语义信息\n下游任务学习各层权重",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "作为特征注入下游模型",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "冻结 ELMo 参数，提取向量\n作为额外特征送入任务模型",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "动态表征示例",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 句子 1\n\"He deposited at the bank\"\n# bank -> [银行义向量]\n\n# 句子 2\n\"We fished at the river bank\"\n# bank -> [河岸义向量]\n\n# 相同词，不同向量！",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "同一个词，不同上下文 → 不同向量\n这在 Word2Vec 时代是不可能的！",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "SQuAD +4.7%   NER +0.7%   SST情感 +1.0%\n（相比 ELMo 之前的 SOTA）",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 6,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 02  ELMo——动态表征的破冰者",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELMo 的历史地位：开创者，而非终点",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "留下的遗产",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "开创预训练+迁移范式",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "证明『大语料预训练，小任务迁移』\n这一路线行得通，影响了\nBERT 和 GPT 的整体设计思路",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "上下文感知可行性验证",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "首次在 NLP 大规模验证了\n动态上下文表征的有效性",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "分层语义的启发",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "不同层捕捉不同粒度信息的思想\n影响了后续 BERT 层分析研究\n及 probing 实验方法论",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "局限与最终命运",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "LSTM 串行，速度慢",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "无法并行计算，训练和推理\n效率远低于 Transformer",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "特征注入，非端到端",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "预训练特征作为额外输入注入\n而非整体 fine-tune，灵活性差",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "深度受限，表征上限低",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "通常只用 2 层 LSTM\n表征能力明显低于\n深层 Transformer",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 7,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT——Transformer 时代的开启",
+      "page_num": 8,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "OpenAI · Radford et al. · 2018",
+      "page_num": 8,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 8,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 03  GPT——Transformer 时代的开启",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT：押注单向 Transformer，统一 fine-tune 范式",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心设计",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Transformer Decoder（单向）",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "每个 token 只能看左边\n因果注意力掩码确保自回归\n12 层，117M 参数",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "预训练：下一词预测",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "P(w_t | w_1,...,w_{t-1})\n最自然的无监督学习目标\n在 BooksCorpus 上预训练",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "统一 fine-tune 方案",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "所有任务改造为序列输入\n在同一模型上 fine-tune\n无需任务专用架构",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "任务输入改造方案",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 分类\n[Start] text [Extract]\n\n# 文本蕴含\n[Start] premise $ hypo [Extract]\n\n# 问答\n[Start] ctx $ answer_k [Extract]",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "所有任务 → 同一模型，统一输入格式",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELMo",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "特征注入 · LSTM · 非端到端",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "端到端 ft · Transformer · 统一",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 9,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 03  GPT——Transformer 时代的开启",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT 的历史地位：方向选对了，时机差了点",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "确立的贡献",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Transformer 是首选主干",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "彻底替代 LSTM，Transformer\n成为预训练模型的标准架构",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "语言模型是通用预训练目标",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Next token prediction 简单有效\nGPT-2/3/4 全部沿用此目标",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "统一 fine-tune 范式",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "一模型多任务，而非\n为每任务重新设计架构\n下游适配成本大幅降低",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "当时的局限",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "单向模型的天然缺陷\n从左到右只看\"过去\"\n对于理解/分类任务\n双向上下文信息更有价值",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "历史评价",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT 发布仅两个月后，BERT 横空出世，在所有理解任务上大幅超越 GPT，让 GPT 的光芒黯淡了将近两年。\n\n但 OpenAI 坚持了生成式路线，而这个看似'错误'的选择，最终通向了 GPT-2、GPT-3，以及 ChatGPT。\n\n生成式 vs 理解式，是 2018 年 NLP 最重要的技术分歧。",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 10,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT——双向理解的集大成",
+      "page_num": 11,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Devlin et al. · Google · 2018.10",
+      "page_num": 11,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 11,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 04  BERT——双向理解的集大成",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT：两个关键预训练目标",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "任务一：Masked LM（MLM）",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "随机遮盖 15% 的 token，让模型预测被遮住的词。\n真正实现了双向上下文建模。",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "输入: \"The cat [MASK] on the mat\"\n\n预测: [MASK] -> \"sat\"\n\n同时看左边\"The cat\"\n和右边\"on the mat\"",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "遮盖策略（15% token）",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "80% 替换为 [MASK]\n10% 替换为随机词\n10% 保持原词不变（减少训练-推理不一致）",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "任务二：Next Sentence Prediction（NSP）",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "判断句子 B 是否是句子 A 的真实下一句。\n目标是帮助模型理解句间关系。",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "[CLS] Sentence A [SEP] Sentence B\n\n正例（50%）:\n  A: \"He went to the store.\"\n  B: \"He bought milk.\"  -> IsNext\n\n负例（50%）:\n  A: \"He went to the store.\"\n  B: \"The sky is blue.\"  -> NotNext",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "后来被质疑：RoBERTa 直接去掉 NSP，效果反而更好。\nNSP 任务太简单，对模型没有实质提升。",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 12,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 04  BERT——双向理解的集大成",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT 为何横扫 NLP 榜单？",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT-Base",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "12 层 / 768 维 / 110M 参数",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT-Large",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "24 层 / 1024 维 / 340M 参数",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "预训练数据",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BooksCorpus + Wikipedia（16GB）",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "下游任务适配方式",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "句子分类",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "取 [CLS] 向量 → 分类层 fine-tune",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "命名实体识别",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "每个 token 向量 → 序列标注",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "问答（SQuAD）",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "输出 span 的起止位置",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "句对任务",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "[CLS] A [SEP] B → 关系分类",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "发布时的成绩单",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• GLUE 综合榜     +7.7%",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• SQuAD v1.1      +1.5%",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• SQuAD v2.0      +5.1%",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• SWAG 常识推理  +27.1%",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 13,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 04  BERT——双向理解的集大成",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT 的争议：并非完美",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "三大争议与局限",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "训练-推理不一致",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "训练时出现 [MASK]，推理时没有\n模型在 fine-tune 阶段从未见过\n真实的 [MASK] token",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "NSP 任务无效",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "后来 RoBERTa 证明直接去掉 NSP\n效果反而更好——任务太简单\n模型靠话题不一致就能判断",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "不擅长生成",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Encoder-only 双向结构不适合\n自回归文本生成，无法做\n续写、翻译、摘要等任务",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "历史影响",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2019",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa、ALBERT、XLNet 等大量\nBERT 变体涌现，试图修复其缺陷",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2020",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "在工业界大规模落地：搜索排序、\n问答系统、文本分类标配",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Encoder-only 模型在理解任务\n（如文本嵌入、分类）仍有优势\n但生成式趋势已完全主导大模型",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 14,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "百花齐放——BERT 变体时代",
+      "page_num": 15,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa · ALBERT · XLNet · DistilBERT · BART · ELECTRA  ·  2019–2020",
+      "page_num": 15,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 15,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 05  百花齐放——BERT 变体时代",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa（2019, Facebook）：把 BERT 训练好",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心改动",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "去掉 NSP 任务",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "只保留 MLM，证明 NSP\n对模型没有实质帮助",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "更长训练 + 更大 batch",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "训练步数 10x、batch 8x\n数据量增加至 160GB",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "动态 Masking",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "每次送入不同的 mask 序列\n而非静态预生成，防过拟合",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "更长序列",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "从 512 → 全程 512\n（原 BERT 有部分 128 步）",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心结论",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"BERT 训练严重不足——更多数据、更长训练、更大 batch，就能大幅超越原始 BERT，无需改架构。\"",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# GLUE 榜单（相比 BERT-Large）\nRoBERTa-Large: 88.5  (+2.2)\n\n# SQuAD 2.0\nRoBERTa:  86.8  vs  BERT: 83.1",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "历史评价：工程调参的胜利。'好好训练'这条原则至今有效，影响了后来所有大模型的训练策略",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 16,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 05  百花齐放——BERT 变体时代",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ALBERT（2019, Google）：让 BERT 变瘦",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "三大压缩技术",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "词嵌入因子分解",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "词表大 embedding (V×H) 分解为\n两个小矩阵 (V×E + E×H)\nE << H，大幅减少词表参数",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "跨层参数共享",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "所有 Transformer 层共享同一套权重\n参数量从 O(L) 降至 O(1)\n但前向传播层数不变",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "SOP 替换 NSP",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Sentence Order Prediction\n预测两段是否顺序互换\n比 NSP 更难，更有效",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "效果与尴尬",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 参数量对比\nBERT-Large:   340M\nALBERT-Large: 18M  (参数 -95%!)\n\n# 但推理速度...\nALBERT-Large: 与 BERT-Large 一样慢\n(层数相同，只是共享了权重)",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心矛盾：\n参数少了，但推理速度没有变快。\n大家要的是'又小又快'，\n不是'小但一样慢'。",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "历史评价：参数共享思路在小模型场景仍有借鉴意义，但主流大模型不采用。SOP 思路被证明比 NSP 好。",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 17,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 05  百花齐放——BERT 变体时代",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "XLNet（2019, CMU + Google）：排列语言模型",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心思想",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "排列语言模型（PLM）",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "对输入序列的所有可能排列进行训练\n每次选一种排列，用自回归方式预测\n理论上实现了双向+自回归的结合",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 句子 \"A B C D\"\n# 其中一种排列：3-1-4-2\n# 预测顺序：C -> A -> D -> B\n# 每次预测都能看到\"整句\"",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Transformer-XL 相对位置编码",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "片段循环机制 + 相对位置编码\n有效处理超长文本，位置编码解耦内容",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"理论很美，工程很复杂\"\n\n排列语言模型训练极其复杂，难以实现，实际效果的提升并不总能弥补工程代价。",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "被历史淘汰：\n排列 LM 实现复杂，GPT 的简单自回归\n更符合'scale up'的趋势，大模型时代\nXLNet 的路线基本无人跟进。",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "但相对位置编码留下了：\nTransformer-XL 的相对位置编码\n思想影响了 RoPE、ALiBi 等编码方式\n成为长上下文模型的核心技术",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 18,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 05  百花齐放——BERT 变体时代",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "DistilBERT & BART（2019）：两种互补路线",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "DistilBERT — 蒸馏出小 BERT",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "知识蒸馏（Knowledge Distillation）：\n用大 BERT 作为'老师'，训练一个更小的'学生'模型",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 效果对比（vs BERT-Base）\n层数:  12 -> 6  (-50%)\n参数:  110M -> 66M  (-40%)\n速度:  1x -> 1.6x  (快 60%)\n性能:  保留 97% GLUE 分数",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "遗产：知识蒸馏成为移动端/边缘设备\n部署小模型的标准手段，至今广泛应用",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BART — 桥接理解与生成",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Encoder-Decoder + 降噪预训练\n用各种方式破坏文本，训练模型重建",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 预训练噪声方式\n- Token Masking (like BERT)\n- Token Deletion\n- Text Infilling\n- Sentence Permutation\n- Document Rotation",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "遗产：Encoder-Decoder+降噪的框架\n直接影响了 T5 的设计理念",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "这两个模型代表了 2019 年 BERT 生态的两个方向：DistilBERT 走向更小更快的部署端，BART 走向更强的生成端。都在各自方向上留下了可用的成果。",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 19,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 05  百花齐放——BERT 变体时代",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELECTRA（2020, Google）：判别器替代掩码预测",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心思想：替换 token 检测",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Generator（生成器）\n小型 MLM 模型，将某些 token 替换\n为合理但错误的词\n\nDiscriminator（判别器）\n判断每个 token 是否被替换\n即 ELECTRA 真正学习的模型",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 原始: \"The chef cooked the meal\"\n# Generator 替换:\n  \"The chef ate the meal\"\n#           ^^^替换了 cooked->ate\n# Discriminator 任务:\n#  判断每个位置是否被替换",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "效率优势",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "MLM 只对被遮盖的 15% token 计算损失\nELECTRA 对所有 token 计算损失\n训练信号利用率：15% → 100%",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 同等算力效果对比\nELECTRA-Small vs BERT-Base:\n  GLUE: 79.9 vs 79.6  (小模型胜)\nELECTRA-Base vs RoBERTa-Large:\n  GLUE: 88.8 vs 88.5  (更少算力胜)",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "历史评价：理念很好，算力效率确实更高。但大模型\n时代转向生成式，Encoder 路线式微，\nELECTRA 也随之逐渐淡出视野。",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 20,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 05  百花齐放——BERT 变体时代",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT 变体时代：哪些思想活下来？",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2019–2020 年的爆发式创新，验证了哪些路线，又淘汰了哪些",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "活下来 / 影响深远",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "被边缘化 / 历史淘汰",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "好好训练",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa 证明：优化训练比改架构更重要",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "知识蒸馏",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "DistilBERT 开创：小模型部署标准方法",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "相对位置编码",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "XLNet → RoPE/ALiBi，长上下文建模核心",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "生成式预训练",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BART 影响 T5，Encoder-Decoder 框架",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "NSP 任务",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa 证伪：去掉 NSP 效果反而更好",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "层权重共享",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ALBERT 路线：参数少但推理没变快",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "排列语言模型",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "XLNet：理论美但工程复杂，无人跟进",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELECTRA 判别式",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Encoder 路线被生成式全面取代",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 21,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-2——\"不发布\"的震惊",
+      "page_num": 22,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "OpenAI · 2019 · 1.5B 参数 · 零样本泛化",
+      "page_num": 22,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 22,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 06  GPT-2——\"不发布\"的震惊",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-2：把语言模型放大，然后什么都不做",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心设计",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "规模大幅扩大",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "参数 1.5B（GPT 的 13 倍）\n48 层 Transformer Decoder\nWebText 数据（Reddit 高赞链接）",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Zero-shot 多任务",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "无需 fine-tune，直接通过\n自然语言提示完成各类任务\n翻译、问答、摘要均有效",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "架构几乎不变",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "仍是 Decoder-only 自回归\n主要改动：Layer Norm 位置调整\n放大比改架构更有效",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Zero-shot 能力示例",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 翻译（无专门训练）\nPrompt: \"Translate to French:\nThe cat sat on the mat\"\nOutput: \"Le chat etait assis\"\n\n# 问答（无专门训练）\nPrompt: \"Q: What is 2+2? A:\"\nOutput: \"4\"",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "规模对比",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT (2018)",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "117M",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "12 层",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT-Large",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "340M",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "24 层",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-2 XL (2019)",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "1,542M",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "48 层",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 23,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 06  GPT-2——\"不发布\"的震惊",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-2：历史性风波与深远遗产",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"不安全，不发布\"事件",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2019 年 2 月，OpenAI 发布 GPT-2 时，\n以\"AI 安全风险\"为由，只放出了小版本，\n拒绝发布完整的 1.5B 版本。\n\n这是 AI 领域首次因'生成内容危险'\n而主动限制发布的重大事件，\n引发了关于 AI 开放 vs 安全的激烈讨论。",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "反思：",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "几个月后，OpenAI 陆续释出完整模型\n后来研究者发现 GPT-2 并没有当初\n预期的那么'危险'\n但这场争论成为 AI 治理讨论的起点",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "技术遗产",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "证明了 Scale 的力量",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "扩大规模 + 不改架构 = 能力涌现\n为 GPT-3 的方向提供了信心",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Zero-shot 成为目标",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "无需任务标注，靠提示词就能完成任务\n成为后来 In-context Learning 的先驱",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "开启 AI 安全讨论",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "AI 生成内容的风险首次被认真对待\n影响了 OpenAI 后来的产品策略",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 24,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "T5 与 GPT-3——大力出奇迹",
+      "page_num": 25,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Google · OpenAI · 2019–2020 · Scale 时代开启",
+      "page_num": 25,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 25,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 07  T5 与 GPT-3——大力出奇迹",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "T5（2019, Google）：一切皆文本",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心思想",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "\"Text-to-Text Transfer Transformer\"\n所有 NLP 任务统一表示为：\n输入文本 → 输出文本",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 分类\n\"sst2 sentence: I love it.\"\n-> \"positive\"\n\n# 翻译\n\"translate English to German: Hi\"\n-> \"Hallo\"\n\n# 摘要\n\"summarize: The cat ...\"\n-> \"A cat sat...\"",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "系统性研究",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "T5 论文本身是一篇大规模系统研究\n比较了各种预训练策略：",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• 预训练目标：MLM vs 语言模型 vs 去噪",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• 架构：Encoder-only vs Decoder-only vs Enc-Dec",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• 数据集：大小 vs 质量的取舍",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "• Fine-tune 策略：多任务 vs 单任务",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "历史遗产：统一 text-to-text 框架的思想超前\n影响了 FLAN、Instruction Tuning\n以及后来的 Seq2Seq 系列模型",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 26,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 07  T5 与 GPT-3——大力出奇迹",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3（2020, OpenAI）：175B 参数，能力涌现",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "175B",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "参数量",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "96 层",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Transformer 深度",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "300B",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "训练 token",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-2 ×117",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "参数倍数",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心能力：In-context Learning",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# Few-shot（无梯度更新）\n\"Translate to French:\nhappy -> heureux\ncold -> froid\ncat -> \"  # 模型填: chat\n\n# Zero-shot\n\"Q: What is the capital of France?\nA:\"  # 模型填: Paris",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "上下文学习（ICL）：在提示里给几个例子，\n模型无需梯度更新就能完成新任务",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "规模律与范式转变",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Scaling Laws 确立",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "损失与参数量、数据、算力\n呈现幂律关系——更大 = 更好",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "涌现能力",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "小模型没有、大模型突然出现\n思维链推理、算术、代码等能力",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Fine-tune 的终结？",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "靠提示词完成多任务，减少标注依赖\n但对齐问题由此开始凸显",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 27,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 07  T5 与 GPT-3——大力出奇迹",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3 之后：兴奋与困惑并存",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "令人兴奋的",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "通用性",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "一个模型写代码、写诗、做翻译\n首次展示了真正的通用 AI 苗头",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Prompt Engineering",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "如何写提示词成为新技能\n催生了一整套 prompt 设计方法论",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "商业化潜力",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "OpenAI 开放 API，大量初创公司\n基于 GPT-3 构建产品",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "遗留的困惑",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "对齐问题",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "模型会撒谎、有偏见、有时\n生成有害内容——如何控制？",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "推理成本巨大",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "175B 模型推理极其昂贵\n无法直接产品化，需要蒸馏压缩",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "可解释性缺失",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "模型为何会这样输出？\n没有人真正知道——黑箱问题",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 28,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "InstructGPT 与 ChatGPT——对齐的胜利",
+      "page_num": 29,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "OpenAI · 2022 · RLHF · 新时代的起点",
+      "page_num": 29,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 29,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "InstructGPT（2022）：让模型听懂人话",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3 的根本问题",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3 的训练目标是『预测下一个 token』\n而不是『完成用户的意图』\n\n结果：能生成流畅文本，但常常\n答非所问、撒谎、有害内容",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RLHF 三步骤",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "① 监督微调（SFT）",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "人工标注示范回答，对 GPT-3 做 fine-tune",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "② 奖励模型（RM）",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "人工对模型回答排序，训练奖励分数预测器",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "③ PPO 强化学习",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "用奖励模型评分，PPO 算法优化 SFT 模型",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "效果对比",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "# 用户偏好实验（人类评估）\nGPT-3 (175B)  vs  InstructGPT (1.3B)\n\n人类更偏好 InstructGPT：85%\n\n# 更小的模型，更好的\"有用性\"\n→ Scale 不是唯一答案",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "核心意义",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "InstructGPT 第一次系统性地解答了：\n如何让模型的输出与人类意图对齐？\n\n『对齐』从此成为大模型的核心议题\nHHH 原则（Helpful · Honest · Harmless）\n成为后续所有对话模型的设计纲领",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 30,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ChatGPT（2022.11）：亿级用户的 AI 时刻",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "5 天",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "100 万用户",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2 个月",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "1 亿月活",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2022.11.30",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "正式上线日",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "史上最快",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "用户增长产品",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "技术本质：并非全新架构",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3.5 + RLHF",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "基础模型是 GPT-3.5（code-davinci-002）\n在 InstructGPT 的对齐方法上迭代",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "对话格式的创新",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "多轮对话拼接为上下文\n[System][Human][Assistant] 格式",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "工程与产品的胜利",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "流式输出 + 简洁界面 + 免费开放\n技术成熟度与产品时机的双重红利",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "为什么引爆了世界？",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "门槛为零",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "无需写代码，自然语言对话即可",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "全能感",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "写邮件、写代码、解题……样样能用",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "即时反馈",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "输出连贯流畅，像真人一样回答",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "免费开放",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "OpenAI 开放公众测试，病毒式传播",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 31,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-4 之后：新时代的几个关键词",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ChatGPT 之后，大模型时代正式开启。以下是继续演进的几个核心方向：",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "多模态",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-4V、Gemini 等\n打通文字、图像、音频",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "开源生态",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "LLaMA、Mistral 推动\n开源模型迅速追赶闭源",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "长上下文",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "从 4K 到 100K+ token\n突破 Attention 的位置限制",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "工具调用/Agent",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "模型调用外部 API/工具\n走向可执行的自主 Agent",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "推理能力强化",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "o1/R1 系列推理模型\n慢思考 + 长链式推理",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "对齐技术迭代",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "DPO、RLHF 变体持续改进\n减少有害内容、提升可控性",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 32,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "全景回顾：从 Word2Vec 到 ChatGPT，什么留下来了？",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "十年演进中，最终活下来的 7 条核心思想",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2013",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "稠密词向量",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Word2Vec → 词嵌入是一切表征的基础",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2018",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Transformer + 自回归 LM",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT 路线 → GPT-2/3/4/ChatGPT 全系列根基",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2018",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "预训练 + fine-tune 范式",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT/GPT → 大数据预训练，小数据迁移",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2019",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "更大规模 + 充分训练",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa → 规模与数据质量比架构改进更重要",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2019",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Text-to-Text 统一格式",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "T5 → Instruction tuning 的思想先驱",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2020",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "In-context Learning",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "GPT-3 → 提示词工程、zero/few-shot 范式",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "2022",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RLHF 对齐",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "InstructGPT → 有用、无害、诚实的对话模型",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 33,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "被历史淘汰的思路，与最终的总结",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "被历史淘汰的路线",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "NSP 任务",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "RoBERTa 证伪：句子关系预测任务无效",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "LSTM 架构",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ELMo 的路线：被 Transformer 全面取代",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "层权重共享",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ALBERT：参数少但推理没变快",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "排列语言模型",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "XLNet：理论美，工程复杂，无人跟进",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "Encoder-only",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "BERT 路线式微，生成式主导大模型",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "最终的思考",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "这段历史告诉我们：\n\n1. 简单 + 可扩展 > 理论优美\n   自回归 LM 赢了所有复杂变体\n\n2. 规模本身就是能力\n   Scale 带来的涌现超出所有预期\n\n3. 对齐与安全不是附加题\n   GPT-2 的争议最终催生了 RLHF",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "ChatGPT 不是终点",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "它是过去十年积累的集大成：\n预训练范式 + 规模定律 + 对齐技术\n三者同时成熟，才有了那个震撼世界的聊天机器人。\n下一个十年，故事还在继续。",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    },
+    {
+      "block_type": "text",
+      "content": "八斗学院出品\n盗版必究",
+      "page_num": 34,
+      "section_path": [],
+      "is_ocr": false,
+      "source_file": "预训练模型演进.pptx",
+      "raw_table": null
+    }
+  ]
+}

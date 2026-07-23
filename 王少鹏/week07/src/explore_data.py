@@ -1,0 +1,244 @@
+"""
+人民日报 (Peoples Daily) NER 数据集探索与可视化
+
+教学重点：
+  1. BIO 标注格式的解析与统计方法
+  2. 各实体类型的分布差异（为什么类别不均衡是NER的难点）
+  3. 文本长度分布（影响 BERT max_length 的选择）
+  4. 实体长度分布（短实体 vs 长实体的识别难度差异）
+
+使用方式：
+  python explore_data.py
+
+输出：
+  outputs/figures/entity_distribution.png   各类实体频次分布
+  outputs/figures/text_length_distribution.png  文本长度分布
+  outputs/figures/entity_length_distribution.png 实体长度分布
+"""
+
+import os
+
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
+import json
+import argparse
+from pathlib import Path
+from collections import Counter
+
+import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.rcParams["font.sans-serif"] = [
+    "SimHei",
+    "Microsoft YaHei",
+    "Arial Unicode MS",
+]
+matplotlib.rcParams["axes.unicode_minus"] = False
+
+ROOT = Path(__file__).parent.parent
+DATA_DIR = ROOT / "data" / "peoples_daily"
+FIG_DIR = ROOT / "outputs" / "figures"
+
+TAG2TYPE = {"PER": "人名", "ORG": "组织机构", "LOC": "地点"}
+
+
+def load_split(split: str) -> list:
+    path = DATA_DIR / f"{split}.json"
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def parse_bio(tokens: list[str], tags: list[str]) -> list[dict]:
+    """将 BIO 标签列表解析为实体列表。"""
+    entities = []
+    i = 0
+    while i < len(tags):
+        tag = tags[i]
+        if tag == "O":
+            i += 1
+            continue
+        if tag.startswith("B-"):
+            etype = tag[2:]
+            start = i
+            i += 1
+            while i < len(tags):
+                if tags[i] == f"I-{etype}":
+                    i += 1
+                else:
+                    break
+            end = i - 1
+            entities.append({
+                "type": etype,
+                "text": "".join(tokens[start:end + 1]),
+                "length": end - start + 1,
+            })
+        else:
+            etype = tag[2:]
+            entities.append({
+                "type": etype, "text": tokens[i], "length": 1,
+            })
+            i += 1
+    return entities
+
+
+def collect_stats(records: list) -> dict:
+    entity_type_counts = Counter()
+    entity_lengths = []
+    text_lengths = []
+    entity_per_sentence = []
+    entities_by_type = {}
+
+    for row in records:
+        tokens = row["tokens"]
+        text = "".join(tokens)
+        text_lengths.append(len(text))
+
+        entities = parse_bio(tokens, row["ner_tags"])
+        entity_per_sentence.append(len(entities))
+
+        for ent in entities:
+            etype = ent["type"]
+            entity_type_counts[etype] += 1
+            entity_lengths.append(ent["length"])
+            if etype not in entities_by_type:
+                entities_by_type[etype] = []
+            entities_by_type[etype].append(ent["text"])
+
+    return {
+        "entity_type_counts": entity_type_counts,
+        "entity_lengths": entity_lengths,
+        "text_lengths": text_lengths,
+        "entity_per_sentence": entity_per_sentence,
+        "entities_by_type": entities_by_type,
+    }
+
+
+def print_summary(stats_train: dict, stats_val: dict):
+    print("=" * 70)
+    print("人民日报 (Peoples Daily) NER 数据集统计摘要（训练集）")
+    print("=" * 70)
+
+    s = stats_train
+    print(f"\n  样本数：{len(s['text_lengths'])} 条")
+    print(f"  文本平均长度：{sum(s['text_lengths']) / len(s['text_lengths']):.1f} 字")
+    print(f"  文本最大长度：{max(s['text_lengths'])} 字")
+    print(f"  文本长度中位数：{sorted(s['text_lengths'])[len(s['text_lengths'])//2]} 字")
+    print(f"  平均实体数/句：{sum(s['entity_per_sentence']) / len(s['entity_per_sentence']):.2f}")
+    print(f"  实体总数：{sum(s['entity_type_counts'].values())}")
+    if s['entity_lengths']:
+        print(f"  平均实体长度：{sum(s['entity_lengths']) / len(s['entity_lengths']):.1f} 字")
+
+    print("\n【各类实体频次（训练集）】")
+    for etype, cnt in sorted(
+        s["entity_type_counts"].items(), key=lambda x: -x[1]
+    ):
+        cn = TAG2TYPE.get(etype, etype)
+        print(f"  {etype:8s} ({cn:6s}) : {cnt:5d} 条")
+
+    print("\n【各类实体示例（训练集，取前5个）】")
+    for etype in sorted(s["entities_by_type"]):
+        cn = TAG2TYPE.get(etype, etype)
+        examples = list(dict.fromkeys(s["entities_by_type"][etype]))[:5]
+        print(f"  {etype:8s} ({cn}) : {' | '.join(examples)}")
+
+    print()
+
+
+def plot_entity_distribution(stats_train: dict):
+    counts = stats_train["entity_type_counts"]
+    et_label = {"PER": "人名", "ORG": "组织机构", "LOC": "地点"}
+    labels = [f"{k}\n({et_label.get(k,k)})" for k in sorted(counts)]
+    values = [counts[k] for k in sorted(counts)]
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    colors = ["#4C72B0", "#DD8452", "#55A868"]
+    bars = ax.bar(labels, values, color=colors[:len(labels)], alpha=0.85, edgecolor="white")
+    for bar, v in zip(bars, values):
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 20,
+            str(v),
+            ha="center", va="bottom", fontsize=11,
+        )
+    ax.set_title("人民日报 NER 各类实体频次分布（训练集）", fontsize=14)
+    ax.set_ylabel("实体数量")
+    ax.set_xlabel("实体类型")
+    plt.tight_layout()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    fig.savefig(FIG_DIR / "entity_distribution.png", dpi=120)
+    print(f"  已保存 → {FIG_DIR / 'entity_distribution.png'}")
+    plt.close()
+
+
+def plot_text_length_distribution(stats_train: dict):
+    lengths = stats_train["text_lengths"]
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.hist(lengths, bins=40, color="#4C72B0", alpha=0.8, edgecolor="white")
+    for x, label, c in [(64, "max_length=64", "red"), (128, "max_length=128", "orange")]:
+        ax.axvline(x=x, color=c, linestyle="--", linewidth=1.5, label=label)
+    p95 = sorted(lengths)[int(len(lengths) * 0.95)]
+    ax.axvline(x=p95, color="green", linestyle="--", linewidth=1.5, label=f"P95={p95}")
+    ax.set_title("文本长度分布（训练集）", fontsize=14)
+    ax.set_xlabel("文本字符数")
+    ax.set_ylabel("样本数")
+    ax.legend()
+    plt.tight_layout()
+    fig.savefig(FIG_DIR / "text_length_distribution.png", dpi=120)
+    print(f"  已保存 → {FIG_DIR / 'text_length_distribution.png'}")
+    plt.close()
+    print(f"  P95 文本长度={p95}，建议 max_length=128")
+
+
+def plot_entity_length_distribution(stats_train: dict):
+    from collections import Counter
+
+    lengths = Counter(stats_train["entity_lengths"])
+    xs = sorted(lengths.keys())
+    ys = [lengths[x] for x in xs]
+
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.bar(
+        [str(x) for x in xs[:20]],
+        ys[:20],
+        color="#55A868",
+        alpha=0.85,
+        edgecolor="white",
+    )
+    ax.set_title("实体长度分布（训练集，前20）", fontsize=14)
+    ax.set_xlabel("实体字符数")
+    ax.set_ylabel("出现次数")
+    plt.tight_layout()
+    fig.savefig(FIG_DIR / "entity_length_distribution.png", dpi=120)
+    print(f"  已保存 → {FIG_DIR / 'entity_length_distribution.png'}")
+    plt.close()
+
+    avg_len = sum(stats_train["entity_lengths"]) / len(stats_train["entity_lengths"])
+    print(f"  实体平均长度={avg_len:.1f}字，CRF 对短实体边界识别优势更明显")
+
+
+def main():
+    parse_args()
+
+    train_records = load_split("train")
+
+    stats_train = collect_stats(train_records)
+
+    print_summary(stats_train, None)
+
+    print("正在生成可视化图表...")
+    plot_entity_distribution(stats_train)
+    plot_text_length_distribution(stats_train)
+    plot_entity_length_distribution(stats_train)
+
+    print("\n探索完成！图表已保存到 outputs/figures/")
+    print("下一步：python train.py               # 训练 BERT+Linear")
+    print("         python train.py --use_crf    # 训练 BERT+CRF")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="探索人民日报 NER 数据集")
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()

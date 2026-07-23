@@ -1,0 +1,366 @@
+[
+  {
+    "content": "预训练模型演进史\n\n从 ELMo 到 ChatGPT\n\n那些改变 NLP 格局的模型、曾经的热门思路，以及它们最终的命运\n\n2013\n\nWord2Vec\n\n2015\n\nSeq2Seq\n\n2017\n\nTransformer\n\n2018\n\nBERT/GPT\n\n2019\n\nBERT变体\n\n2020\n\nGPT-3\n\n2022\n\nChatGPT\n\n8 个里程碑  ·  29+ 页  ·  哪些思想活下来，哪些被历史淘汰\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 1,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00000"
+  },
+  {
+    "content": "Part 01  词向量时代的局限\n\nWord2Vec / GloVe：静态词向量时代\n\n核心思路\n\nWord2Vec（2013，Google）\n\n预测上下文词，训练稠密词向量\n两种模式：CBOW 和 Skip-gram\n\nGloVe（2014，Stanford）\n\n全局共现矩阵分解，兼顾\n局部上下文与全局统计信息\n\n共同成就\n\n稠密低维向量大幅优于 one-hot\n词语类比推理：king - man + woman = queen\n\n核心问题：静态向量\n\n\"bank\" 这个词，不管什么语境，向量完全相同\n\nsent1 = \"went to the bank\"\n      # 银行\n\nsent2 = \"sat on the river bank\"\n      # 河岸\n\n# 两句中 bank 向量完全一样!\n\n一词一向量：无视上下文\n预训练仅限词向量，深层表征靠任务\n数据从头学——数据少则效果差\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 3,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00001"
+  },
+  {
+    "content": "Part 01  词向量时代的局限\n\n为什么需要动态 / 上下文敏感的表征？\n\n多义词歧义\n\n\"bank\" \"spring\" \"fly\"\n不同语境含义完全不同\n静态向量无法区分\n\n句法语义理解\n\n\"I ate the cake\" vs\n\"The cake was eaten\"\n词序影响语义，词袋无法捕捉\n\n任务特异性强\n\n每任务需从头大量训练\n数据少时容易过拟合\n泛化能力受限\n\n当时的解法（2015–2017）\n\n• Seq2Seq + Attention（2015）\n\n注意力机制聚焦关键词，翻译/摘要效果大幅提升\n\n• 双向 LSTM（biLSTM）\n\n正向+反向拼接，捕捉左右上下文；但串行慢，每任务独立训练\n\n• 核心局限\n\n深层表征仍依赖任务数据——数据少=效果差；亟需通用上下文预训练\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 4,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00002"
+  },
+  {
+    "content": "Part 02  ELMo——动态表征的破冰者\n\nELMo：从静态到动态的关键一步\n\n核心设计\n\n双向语言模型（biLM）\n\n正向 LSTM 预测下一词\n反向 LSTM 预测上一词\n拼接得到双向上下文表征\n\n多层表征加权融合\n\n底层：捕捉词法/句法信息\n高层：捕捉语义信息\n下游任务学习各层权重\n\n作为特征注入下游模型\n\n冻结 ELMo 参数，提取向量\n作为额外特征送入任务模型\n\n动态表征示例\n\n# 句子 1\n\"He deposited at the bank\"\n# bank -> [银行义向量]\n\n# 句子 2\n\"We fished at the river bank\"\n# bank -> [河岸义向量]\n\n# 相同词，不同向量！\n\n同一个词，不同上下文 → 不同向量\n这在 Word2Vec 时代是不可能的！\n\nSQuAD +4.7%   NER +0.7%   SST情感 +1.0%\n（相比 ELMo 之前的 SOTA）\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 6,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00003"
+  },
+  {
+    "content": "Part 02  ELMo——动态表征的破冰者\n\nELMo 的历史地位：开创者，而非终点\n\n留下的遗产\n\n开创预训练+迁移范式\n\n证明『大语料预训练，小任务迁移』\n这一路线行得通，影响了\nBERT 和 GPT 的整体设计思路\n\n上下文感知可行性验证\n\n首次在 NLP 大规模验证了\n动态上下文表征的有效性\n\n分层语义的启发\n\n不同层捕捉不同粒度信息的思想\n影响了后续 BERT 层分析研究\n及 probing 实验方法论\n\n局限与最终命运\n\nLSTM 串行，速度慢\n\n无法并行计算，训练和推理\n效率远低于 Transformer\n\n特征注入，非端到端\n\n预训练特征作为额外输入注入\n而非整体 fine-tune，灵活性差\n\n深度受限，表征上限低\n\n通常只用 2 层 LSTM\n表征能力明显低于\n深层 Transformer\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 7,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00004"
+  },
+  {
+    "content": "Part 03  GPT——Transformer 时代的开启\n\nGPT：押注单向 Transformer，统一 fine-tune 范式\n\n核心设计\n\nTransformer Decoder（单向）\n\n每个 token 只能看左边\n因果注意力掩码确保自回归\n12 层，117M 参数\n\n预训练：下一词预测\n\nP(w_t | w_1,...,w_{t-1})\n最自然的无监督学习目标\n在 BooksCorpus 上预训练\n\n统一 fine-tune 方案\n\n所有任务改造为序列输入\n在同一模型上 fine-tune\n无需任务专用架构\n\n任务输入改造方案\n\n# 分类\n[Start] text [Extract]\n\n# 文本蕴含\n[Start] premise $ hypo [Extract]\n\n# 问答\n[Start] ctx $ answer_k [Extract]\n\n所有任务 → 同一模型，统一输入格式\n\nELMo\n\n特征注入 · LSTM · 非端到端\n\nGPT\n\n端到端 ft · Transformer · 统一\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 9,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00005"
+  },
+  {
+    "content": "Part 03  GPT——Transformer 时代的开启\n\nGPT 的历史地位：方向选对了，时机差了点\n\n确立的贡献\n\nTransformer 是首选主干\n\n彻底替代 LSTM，Transformer\n成为预训练模型的标准架构\n\n语言模型是通用预训练目标\n\nNext token prediction 简单有效\nGPT-2/3/4 全部沿用此目标\n\n统一 fine-tune 范式\n\n一模型多任务，而非\n为每任务重新设计架构\n下游适配成本大幅降低\n\n当时的局限\n\n单向模型的天然缺陷\n从左到右只看\"过去\"\n对于理解/分类任务\n双向上下文信息更有价值\n\n历史评价\n\nGPT 发布仅两个月后，BERT 横空出世，在所有理解任务上大幅超越 GPT，让 GPT 的光芒黯淡了将近两年。\n\n但 OpenAI 坚持了生成式路线，而这个看似'错误'的选择，最终通向了 GPT-2、GPT-3，以及 ChatGPT。\n\n生成式 vs 理解式，是 2018 年 NLP 最重要的技术分歧。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 10,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00006"
+  },
+  {
+    "content": "Part 04  BERT——双向理解的集大成\n\nBERT：两个关键预训练目标\n\n任务一：Masked LM（MLM）\n\n随机遮盖 15% 的 token，让模型预测被遮住的词。\n真正实现了双向上下文建模。\n\n输入: \"The cat [MASK] on the mat\"\n\n预测: [MASK] -> \"sat\"\n\n同时看左边\"The cat\"\n和右边\"on the mat\"\n\n遮盖策略（15% token）\n\n80% 替换为 [MASK]\n10% 替换为随机词\n10% 保持原词不变（减少训练-推理不一致）\n\n任务二：Next Sentence Prediction（NSP）\n\n判断句子 B 是否是句子 A 的真实下一句。\n目标是帮助模型理解句间关系。\n\n[CLS] Sentence A [SEP] Sentence B\n\n正例（50%）:\n  A: \"He went to the store.\"\n  B: \"He bought milk.\"  -> IsNext\n\n负例（50%）:\n  A: \"He went to the store.\"\n  B: \"The sky is blue.\"  -> NotNext\n\n后来被质疑：RoBERTa 直接去掉 NSP，效果反而更好。\nNSP 任务太简单，对模型没有实质提升。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 12,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00007"
+  },
+  {
+    "content": "Part 04  BERT——双向理解的集大成\n\nBERT 为何横扫 NLP 榜单？\n\nBERT-Base\n\n12 层 / 768 维 / 110M 参数\n\nBERT-Large\n\n24 层 / 1024 维 / 340M 参数\n\n预训练数据\n\nBooksCorpus + Wikipedia（16GB）\n\n下游任务适配方式\n\n句子分类\n\n取 [CLS] 向量 → 分类层 fine-tune\n\n命名实体识别\n\n每个 token 向量 → 序列标注\n\n问答（SQuAD）\n\n输出 span 的起止位置\n\n句对任务\n\n[CLS] A [SEP] B → 关系分类\n\n发布时的成绩单\n\n• GLUE 综合榜     +7.7%\n\n• SQuAD v1.1      +1.5%\n\n• SQuAD v2.0      +5.1%\n\n• SWAG 常识推理  +27.1%\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 13,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00008"
+  },
+  {
+    "content": "Part 04  BERT——双向理解的集大成\n\nBERT 的争议：并非完美\n\n三大争议与局限\n\n训练-推理不一致\n\n训练时出现 [MASK]，推理时没有\n模型在 fine-tune 阶段从未见过\n真实的 [MASK] token\n\nNSP 任务无效\n\n后来 RoBERTa 证明直接去掉 NSP\n效果反而更好——任务太简单\n模型靠话题不一致就能判断\n\n不擅长生成\n\nEncoder-only 双向结构不适合\n自回归文本生成，无法做\n续写、翻译、摘要等任务\n\n历史影响\n\n2019\n\nRoBERTa、ALBERT、XLNet 等大量\nBERT 变体涌现，试图修复其缺陷\n\n2020\n\n在工业界大规模落地：搜索排序、\n问答系统、文本分类标配\n\nEncoder-only 模型在理解任务\n（如文本嵌入、分类）仍有优势\n但生成式趋势已完全主导大模型\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 14,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00009"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nRoBERTa（2019, Facebook）：把 BERT 训练好\n\n核心改动\n\n去掉 NSP 任务\n\n只保留 MLM，证明 NSP\n对模型没有实质帮助\n\n更长训练 + 更大 batch\n\n训练步数 10x、batch 8x\n数据量增加至 160GB\n\n动态 Masking\n\n每次送入不同的 mask 序列\n而非静态预生成，防过拟合\n\n更长序列\n\n从 512 → 全程 512\n（原 BERT 有部分 128 步）\n\n核心结论\n\n\"BERT 训练严重不足——更多数据、更长训练、更大 batch，就能大幅超越原始 BERT，无需改架构。\"\n\n# GLUE 榜单（相比 BERT-Large）\nRoBERTa-Large: 88.5  (+2.2)\n\n# SQuAD 2.0\nRoBERTa:  86.8  vs  BERT: 83.1\n\n历史评价：工程调参的胜利。'好好训练'这条原则至今有效，影响了后来所有大模型的训练策略\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 16,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00010"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nALBERT（2019, Google）：让 BERT 变瘦\n\n三大压缩技术\n\n词嵌入因子分解\n\n词表大 embedding (V×H) 分解为\n两个小矩阵 (V×E + E×H)\nE << H，大幅减少词表参数\n\n跨层参数共享\n\n所有 Transformer 层共享同一套权重\n参数量从 O(L) 降至 O(1)\n但前向传播层数不变\n\nSOP 替换 NSP\n\nSentence Order Prediction\n预测两段是否顺序互换\n比 NSP 更难，更有效\n\n效果与尴尬\n\n# 参数量对比\nBERT-Large:   340M\nALBERT-Large: 18M  (参数 -95%!)\n\n# 但推理速度...\nALBERT-Large: 与 BERT-Large 一样慢\n(层数相同，只是共享了权重)\n\n核心矛盾：\n参数少了，但推理速度没有变快。\n大家要的是'又小又快'，\n不是'小但一样慢'。\n\n历史评价：参数共享思路在小模型场景仍有借鉴意义，但主流大模型不采用。SOP 思路被证明比 NSP 好。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 17,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00011"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nXLNet（2019, CMU + Google）：排列语言模型\n\n核心思想\n\n排列语言模型（PLM）\n\n对输入序列的所有可能排列进行训练\n每次选一种排列，用自回归方式预测\n理论上实现了双向+自回归的结合\n\n# 句子 \"A B C D\"\n# 其中一种排列：3-1-4-2\n# 预测顺序：C -> A -> D -> B\n# 每次预测都能看到\"整句\"\n\nTransformer-XL 相对位置编码\n\n片段循环机制 + 相对位置编码\n有效处理超长文本，位置编码解耦内容\n\n\"理论很美，工程很复杂\"\n\n排列语言模型训练极其复杂，难以实现，实际效果的提升并不总能弥补工程代价。\n\n被历史淘汰：\n排列 LM 实现复杂，GPT 的简单自回归\n更符合'scale up'的趋势，大模型时代\nXLNet 的路线基本无人跟进。\n\n但相对位置编码留下了：\nTransformer-XL 的相对位置编码\n思想影响了 RoPE、ALiBi 等编码方式\n成为长上下文模型的核心技术\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 18,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00012"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nDistilBERT & BART（2019）：两种互补路线\n\nDistilBERT — 蒸馏出小 BERT\n\n知识蒸馏（Knowledge Distillation）：\n用大 BERT 作为'老师'，训练一个更小的'学生'模型\n\n# 效果对比（vs BERT-Base）\n层数:  12 -> 6  (-50%)\n参数:  110M -> 66M  (-40%)\n速度:  1x -> 1.6x  (快 60%)\n性能:  保留 97% GLUE 分数\n\n遗产：知识蒸馏成为移动端/边缘设备\n部署小模型的标准手段，至今广泛应用\n\nBART — 桥接理解与生成\n\nEncoder-Decoder + 降噪预训练\n用各种方式破坏文本，训练模型重建\n\n# 预训练噪声方式\n- Token Masking (like BERT)\n- Token Deletion\n- Text Infilling\n- Sentence Permutation\n- Document Rotation\n\n遗产：Encoder-Decoder+降噪的框架\n直接影响了 T5 的设计理念\n\n这两个模型代表了 2019 年 BERT 生态的两个方向：DistilBERT 走向更小更快的部署端，BART 走向更强的生成端。都在各自方向上留下了可用的成果。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 19,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00013"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nELECTRA（2020, Google）：判别器替代掩码预测\n\n核心思想：替换 token 检测\n\nGenerator（生成器）\n小型 MLM 模型，将某些 token 替换\n为合理但错误的词\n\nDiscriminator（判别器）\n判断每个 token 是否被替换\n即 ELECTRA 真正学习的模型\n\n# 原始: \"The chef cooked the meal\"\n# Generator 替换:\n  \"The chef ate the meal\"\n#           ^^^替换了 cooked->ate\n# Discriminator 任务:\n#  判断每个位置是否被替换\n\n效率优势\n\nMLM 只对被遮盖的 15% token 计算损失\nELECTRA 对所有 token 计算损失\n训练信号利用率：15% → 100%\n\n# 同等算力效果对比\nELECTRA-Small vs BERT-Base:\n  GLUE: 79.9 vs 79.6  (小模型胜)\nELECTRA-Base vs RoBERTa-Large:\n  GLUE: 88.8 vs 88.5  (更少算力胜)\n\n历史评价：理念很好，算力效率确实更高。但大模型\n时代转向生成式，Encoder 路线式微，\nELECTRA 也随之逐渐淡出视野。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 20,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00014"
+  },
+  {
+    "content": "Part 05  百花齐放——BERT 变体时代\n\nBERT 变体时代：哪些思想活下来？\n\n2019–2020 年的爆发式创新，验证了哪些路线，又淘汰了哪些\n\n活下来 / 影响深远\n\n被边缘化 / 历史淘汰\n\n好好训练\n\nRoBERTa 证明：优化训练比改架构更重要\n\n知识蒸馏\n\nDistilBERT 开创：小模型部署标准方法\n\n相对位置编码\n\nXLNet → RoPE/ALiBi，长上下文建模核心\n\n生成式预训练\n\nBART 影响 T5，Encoder-Decoder 框架\n\nNSP 任务\n\nRoBERTa 证伪：去掉 NSP 效果反而更好\n\n层权重共享\n\nALBERT 路线：参数少但推理没变快\n\n排列语言模型\n\nXLNet：理论美但工程复杂，无人跟进\n\nELECTRA 判别式\n\nEncoder 路线被生成式全面取代\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 21,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00015"
+  },
+  {
+    "content": "Part 06  GPT-2——\"不发布\"的震惊\n\nGPT-2：把语言模型放大，然后什么都不做\n\n核心设计\n\n规模大幅扩大\n\n参数 1.5B（GPT 的 13 倍）\n48 层 Transformer Decoder\nWebText 数据（Reddit 高赞链接）\n\nZero-shot 多任务\n\n无需 fine-tune，直接通过\n自然语言提示完成各类任务\n翻译、问答、摘要均有效\n\n架构几乎不变\n\n仍是 Decoder-only 自回归\n主要改动：Layer Norm 位置调整\n放大比改架构更有效\n\nZero-shot 能力示例\n\n# 翻译（无专门训练）\nPrompt: \"Translate to French:\nThe cat sat on the mat\"\nOutput: \"Le chat etait assis\"\n\n# 问答（无专门训练）\nPrompt: \"Q: What is 2+2? A:\"\nOutput: \"4\"\n\n规模对比\n\nGPT (2018)\n\n117M\n\n12 层\n\nBERT-Large\n\n340M\n\n24 层\n\nGPT-2 XL (2019)\n\n1,542M\n\n48 层\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 23,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00016"
+  },
+  {
+    "content": "Part 06  GPT-2——\"不发布\"的震惊\n\nGPT-2：历史性风波与深远遗产\n\n\"不安全，不发布\"事件\n\n2019 年 2 月，OpenAI 发布 GPT-2 时，\n以\"AI 安全风险\"为由，只放出了小版本，\n拒绝发布完整的 1.5B 版本。\n\n这是 AI 领域首次因'生成内容危险'\n而主动限制发布的重大事件，\n引发了关于 AI 开放 vs 安全的激烈讨论。\n\n反思：\n\n几个月后，OpenAI 陆续释出完整模型\n后来研究者发现 GPT-2 并没有当初\n预期的那么'危险'\n但这场争论成为 AI 治理讨论的起点\n\n技术遗产\n\n证明了 Scale 的力量\n\n扩大规模 + 不改架构 = 能力涌现\n为 GPT-3 的方向提供了信心\n\nZero-shot 成为目标\n\n无需任务标注，靠提示词就能完成任务\n成为后来 In-context Learning 的先驱\n\n开启 AI 安全讨论\n\nAI 生成内容的风险首次被认真对待\n影响了 OpenAI 后来的产品策略\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 24,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00017"
+  },
+  {
+    "content": "Part 07  T5 与 GPT-3——大力出奇迹\n\nT5（2019, Google）：一切皆文本\n\n核心思想\n\n\"Text-to-Text Transfer Transformer\"\n所有 NLP 任务统一表示为：\n输入文本 → 输出文本\n\n# 分类\n\"sst2 sentence: I love it.\"\n-> \"positive\"\n\n# 翻译\n\"translate English to German: Hi\"\n-> \"Hallo\"\n\n# 摘要\n\"summarize: The cat ...\"\n-> \"A cat sat...\"\n\n系统性研究\n\nT5 论文本身是一篇大规模系统研究\n比较了各种预训练策略：\n\n• 预训练目标：MLM vs 语言模型 vs 去噪\n\n• 架构：Encoder-only vs Decoder-only vs Enc-Dec\n\n• 数据集：大小 vs 质量的取舍\n\n• Fine-tune 策略：多任务 vs 单任务\n\n历史遗产：统一 text-to-text 框架的思想超前\n影响了 FLAN、Instruction Tuning\n以及后来的 Seq2Seq 系列模型\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 26,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00018"
+  },
+  {
+    "content": "Part 07  T5 与 GPT-3——大力出奇迹\n\nGPT-3（2020, OpenAI）：175B 参数，能力涌现\n\n175B\n\n参数量\n\n96 层\n\nTransformer 深度\n\n300B\n\n训练 token\n\nGPT-2 ×117\n\n参数倍数\n\n核心能力：In-context Learning\n\n# Few-shot（无梯度更新）\n\"Translate to French:\nhappy -> heureux\ncold -> froid\ncat -> \"  # 模型填: chat\n\n# Zero-shot\n\"Q: What is the capital of France?\nA:\"  # 模型填: Paris\n\n上下文学习（ICL）：在提示里给几个例子，\n模型无需梯度更新就能完成新任务\n\n规模律与范式转变\n\nScaling Laws 确立\n\n损失与参数量、数据、算力\n呈现幂律关系——更大 = 更好\n\n涌现能力\n\n小模型没有、大模型突然出现\n思维链推理、算术、代码等能力\n\nFine-tune 的终结？\n\n靠提示词完成多任务，减少标注依赖\n但对齐问题由此开始凸显\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 27,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00019"
+  },
+  {
+    "content": "Part 07  T5 与 GPT-3——大力出奇迹\n\nGPT-3 之后：兴奋与困惑并存\n\n令人兴奋的\n\n通用性\n\n一个模型写代码、写诗、做翻译\n首次展示了真正的通用 AI 苗头\n\nPrompt Engineering\n\n如何写提示词成为新技能\n催生了一整套 prompt 设计方法论\n\n商业化潜力\n\nOpenAI 开放 API，大量初创公司\n基于 GPT-3 构建产品\n\n遗留的困惑\n\n对齐问题\n\n模型会撒谎、有偏见、有时\n生成有害内容——如何控制？\n\n推理成本巨大\n\n175B 模型推理极其昂贵\n无法直接产品化，需要蒸馏压缩\n\n可解释性缺失\n\n模型为何会这样输出？\n没有人真正知道——黑箱问题\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 28,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00020"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\nInstructGPT（2022）：让模型听懂人话\n\nGPT-3 的根本问题\n\nGPT-3 的训练目标是『预测下一个 token』\n而不是『完成用户的意图』\n\n结果：能生成流畅文本，但常常\n答非所问、撒谎、有害内容\n\nRLHF 三步骤\n\n① 监督微调（SFT）\n\n人工标注示范回答，对 GPT-3 做 fine-tune\n\n② 奖励模型（RM）\n\n人工对模型回答排序，训练奖励分数预测器\n\n③ PPO 强化学习\n\n用奖励模型评分，PPO 算法优化 SFT 模型\n\n效果对比\n\n# 用户偏好实验（人类评估）\nGPT-3 (175B)  vs  InstructGPT (1.3B)\n\n人类更偏好 InstructGPT：85%\n\n# 更小的模型，更好的\"有用性\"\n→ Scale 不是唯一答案\n\n核心意义\n\nInstructGPT 第一次系统性地解答了：\n如何让模型的输出与人类意图对齐？\n\n『对齐』从此成为大模型的核心议题\nHHH 原则（Helpful · Honest · Harmless）\n成为后续所有对话模型的设计纲领\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 30,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00021"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\nChatGPT（2022.11）：亿级用户的 AI 时刻\n\n5 天\n\n100 万用户\n\n2 个月\n\n1 亿月活\n\n2022.11.30\n\n正式上线日\n\n史上最快\n\n用户增长产品\n\n技术本质：并非全新架构\n\nGPT-3.5 + RLHF\n\n基础模型是 GPT-3.5（code-davinci-002）\n在 InstructGPT 的对齐方法上迭代\n\n对话格式的创新\n\n多轮对话拼接为上下文\n[System][Human][Assistant] 格式\n\n工程与产品的胜利\n\n流式输出 + 简洁界面 + 免费开放\n技术成熟度与产品时机的双重红利\n\n为什么引爆了世界？\n\n门槛为零\n\n无需写代码，自然语言对话即可\n\n全能感\n\n写邮件、写代码、解题……样样能用\n\n即时反馈\n\n输出连贯流畅，像真人一样回答\n\n免费开放\n\nOpenAI 开放公众测试，病毒式传播\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 31,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00022"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\nGPT-4 之后：新时代的几个关键词\n\nChatGPT 之后，大模型时代正式开启。以下是继续演进的几个核心方向：\n\n多模态\n\nGPT-4V、Gemini 等\n打通文字、图像、音频\n\n开源生态\n\nLLaMA、Mistral 推动\n开源模型迅速追赶闭源\n\n长上下文\n\n从 4K 到 100K+ token\n突破 Attention 的位置限制\n\n工具调用/Agent\n\n模型调用外部 API/工具\n走向可执行的自主 Agent\n\n推理能力强化\n\no1/R1 系列推理模型\n慢思考 + 长链式推理\n\n对齐技术迭代\n\nDPO、RLHF 变体持续改进\n减少有害内容、提升可控性\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 32,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00023"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\n全景回顾：从 Word2Vec 到 ChatGPT，什么留下来了？\n\n十年演进中，最终活下来的 7 条核心思想\n\n2013\n\n稠密词向量\n\nWord2Vec → 词嵌入是一切表征的基础\n\n2018\n\nTransformer + 自回归 LM\n\nGPT 路线 → GPT-2/3/4/ChatGPT 全系列根基\n\n2018\n\n预训练 + fine-tune 范式\n\nBERT/GPT → 大数据预训练，小数据迁移\n\n2019\n\n更大规模 + 充分训练\n\nRoBERTa → 规模与数据质量比架构改进更重要\n\n2019\n\nText-to-Text 统一格式\n\nT5 → Instruction tuning 的思想先驱\n\n2020\n\nIn-context Learning\n\nGPT-3 → 提示词工程、zero/few-shot 范式\n\n2022\n\nRLHF 对齐\n\nInstructGPT → 有用、无害、诚实的对话模型\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 33,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00024"
+  },
+  {
+    "content": "Part 08  InstructGPT 与 ChatGPT——对齐的胜利\n\n被历史淘汰的思路，与最终的总结\n\n被历史淘汰的路线\n\nNSP 任务\n\nRoBERTa 证伪：句子关系预测任务无效\n\nLSTM 架构\n\nELMo 的路线：被 Transformer 全面取代\n\n层权重共享\n\nALBERT：参数少但推理没变快\n\n排列语言模型\n\nXLNet：理论美，工程复杂，无人跟进\n\nEncoder-only\n\nBERT 路线式微，生成式主导大模型\n\n最终的思考\n\n这段历史告诉我们：\n\n1. 简单 + 可扩展 > 理论优美\n   自回归 LM 赢了所有复杂变体\n\n2. 规模本身就是能力\n   Scale 带来的涌现超出所有预期\n\n3. 对齐与安全不是附加题\n   GPT-2 的争议最终催生了 RLHF\n\nChatGPT 不是终点\n\n它是过去十年积累的集大成：\n预训练范式 + 规模定律 + 对齐技术\n三者同时成熟，才有了那个震撼世界的聊天机器人。\n下一个十年，故事还在继续。\n\n八斗学院出品\n盗版必究",
+    "metadata": {
+      "page_num": 34,
+      "section": "",
+      "block_types": [
+        "text"
+      ],
+      "is_ocr": false,
+      "strategy": "semantic",
+      "source_file": "预训练模型演进"
+    },
+    "chunk_id": "预训练模型演进_00025"
+  }
+]

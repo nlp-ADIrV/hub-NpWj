@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# 训练 checkpoint 体积较大，提交代码时通常不放进 Git。
+# 如果老师要求提交模型文件，再手动打包 outputs/checkpoints/。
+outputs/checkpoints/
