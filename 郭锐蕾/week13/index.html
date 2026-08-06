@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>渐进式 Skill Harness</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #121a2b;
+    --ink: #e8eef9;
+    --muted: #93a0b8;
+    --line: #243049;
+    --always: #2e86ab;
+    --ondemand: #217b45;
+    --inctx: #d4720a;
+    --release: #666666;
+    --accent: #5b8def;
+    --good: #34d399;
+    --warn: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #1a2744 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #132033 0%, transparent 50%),
+      var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+  h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: 0.2px; }
+  .sub { color: var(--muted); margin-bottom: 22px; font-size: 14px; }
+  .row { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; }
+  @media (max-width: 900px) { .row { grid-template-columns: 1fr; } }
+  .panel {
+    background: color-mix(in srgb, var(--panel) 92%, black);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  textarea, input, select {
+    width: 100%;
+    background: #0d1524;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  button {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.secondary { background: #243049; }
+  button:disabled { opacity: 0.5; cursor: wait; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #1a2438;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip:hover { color: var(--ink); border-color: var(--accent); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat {
+    background: #0d1524;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .stat .n { font-size: 22px; font-weight: 700; }
+  .stat .t { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .lifecycle { margin-top: 16px; }
+  .step {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px 6px;
+    border-radius: 8px;
+    color: white;
+    height: fit-content;
+  }
+  .b-always { background: var(--always); }
+  .b-match { background: #34495e; }
+  .b-ondemand { background: var(--ondemand); }
+  .b-exec { background: var(--inctx); }
+  .b-release { background: var(--release); }
+  .layers { margin-top: 12px; }
+  .layer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    background: #0d1524;
+    border-left: 4px solid var(--line);
+    font-size: 13px;
+  }
+  .layer.always { border-left-color: var(--always); }
+  .layer.on_demand { border-left-color: var(--ondemand); }
+  .layer.in_context { border-left-color: var(--inctx); }
+  .muted { color: var(--muted); }
+  pre {
+    background: #0d1524;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    overflow: auto;
+    font-size: 12px;
+    line-height: 1.45;
+    max-height: 280px;
+  }
+  .ok { color: var(--good); }
+  .warn { color: var(--warn); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>渐进式 Skill 加载 Harness</h1>
+    <p class="sub">常驻索引 → 触发匹配 → 加载 SKILL.md → 执行（可二级加载 references/scripts）→ 释放</p>
+
+    <div class="row">
+      <div class="panel">
+        <label>用户消息</label>
+        <textarea id="msg">给我做张 crazy 的闪卡</textarea>
+        <div class="chips" id="samples"></div>
+        <div class="controls">
+          <select id="mode" style="width:auto">
+            <option value="demo">demo（本地脚本/计划）</option>
+            <option value="llm">llm（需 API Key）</option>
+          </select>
+          <button id="runBtn">运行一轮</button>
+          <button class="secondary" id="statusBtn">刷新索引</button>
+        </div>
+        <div class="lifecycle" id="lifecycle"></div>
+      </div>
+
+      <div class="panel">
+        <div class="stats" id="stats">
+          <div class="stat"><div class="n" id="sCount">-</div><div class="t">已注册 Skills</div></div>
+          <div class="stat"><div class="n" id="sIndexTok">-</div><div class="t">常驻索引 tokens</div></div>
+          <div class="stat"><div class="n" id="sProg">-</div><div class="t">本轮渐进 tokens</div></div>
+          <div class="stat"><div class="n" id="sSaved">-</div><div class="t">相对全量节省</div></div>
+        </div>
+        <h3 style="margin:18px 0 8px;font-size:15px">Context 分层</h3>
+        <div class="layers" id="layers"></div>
+        <h3 style="margin:18px 0 8px;font-size:15px">常驻索引</h3>
+        <pre id="indexMd" class="muted">加载中…</pre>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h3 style="margin:0 0 8px;font-size:15px">执行输出</h3>
+      <pre id="out">等待运行…</pre>
+    </div>
+  </div>
+
+<script>
+const samples = [
+  "给我做张 crazy 的闪卡",
+  "画一个系统架构图",
+  "帮我做个 PPT deck",
+  "请 review 这段代码",
+  "今天天气怎么样",
+];
+
+const samplesEl = document.getElementById("samples");
+samples.forEach(s => {
+  const el = document.createElement("span");
+  el.className = "chip";
+  el.textContent = s;
+  el.onclick = () => { document.getElementById("msg").value = s; };
+  samplesEl.appendChild(el);
+});
+
+function badgeClass(step) {
+  if (step.includes("always") || step.includes("index")) return "b-always";
+  if (step.includes("match") || step.includes("02") || step.includes("no_match")) return "b-match";
+  if (step.includes("load_skill") || step.includes("03")) return "b-ondemand";
+  if (step.includes("04") || step.includes("execute") || step.includes("secondary") || step.includes("script")) return "b-exec";
+  if (step.includes("05") || step.includes("release")) return "b-release";
+  return "b-match";
+}
+
+async function refreshStatus() {
+  const st = await fetch("/api/status").then(r => r.json());
+  const idx = await fetch("/api/index").then(r => r.json());
+  document.getElementById("sCount").textContent = st.index.skill_count;
+  document.getElementById("sIndexTok").textContent = st.index.index_tokens;
+  document.getElementById("indexMd").textContent = idx.markdown;
+  const ok = st.index.under_200_tokens;
+  document.getElementById("sIndexTok").className = "n " + (ok ? "ok" : "warn");
+}
+
+async function runOnce() {
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true;
+  try {
+    const body = {
+      message: document.getElementById("msg").value,
+      mode: document.getElementById("mode").value,
+      auto_release: true,
+      load_secondary: true,
+    };
+    const data = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then(r => r.json());
+
+    const life = document.getElementById("lifecycle");
+    life.innerHTML = data.events.map(ev => `
+      <div class="step">
+        <div class="badge ${badgeClass(ev.step)}">${ev.step}</div>
+        <div>
+          <div>${ev.message}</div>
+          <div class="muted" style="font-size:12px;margin-top:4px">${JSON.stringify(ev.data)}</div>
+        </div>
+      </div>
+    `).join("");
+
+    const layers = document.getElementById("layers");
+    layers.innerHTML = data.layers.map(ly => `
+      <div class="layer ${ly.layer}">
+        <div><strong>${ly.name}</strong><div class="muted">${ly.source}</div></div>
+        <div>${ly.token_estimate} tok</div>
+      </div>
+    `).join("") || "<div class='muted'>无分层</div>";
+
+    const c = data.comparison || {};
+    document.getElementById("sProg").textContent = c.progressive_tokens ?? "-";
+    document.getElementById("sSaved").textContent =
+      (c.saved_ratio_percent != null) ? (c.saved_ratio_percent + "%") : "-";
+
+    document.getElementById("out").textContent = JSON.stringify({
+      matched: data.matched,
+      secondary_loaded: data.secondary_loaded,
+      execution_notes: data.execution_notes,
+      script_outputs: data.script_outputs,
+      released: data.released,
+      comparison: data.comparison,
+    }, null, 2);
+  } catch (e) {
+    document.getElementById("out").textContent = String(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById("runBtn").onclick = runOnce;
+document.getElementById("statusBtn").onclick = refreshStatus;
+refreshStatus();
+</script>
+</body>
+</html>

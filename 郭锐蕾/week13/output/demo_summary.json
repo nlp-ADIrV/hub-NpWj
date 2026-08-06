@@ -1,0 +1,59 @@
+[
+  {
+    "message": "给我做张 crazy 的闪卡",
+    "matched": "flash-card",
+    "progressive_tokens": 970,
+    "full_load_tokens": 7812,
+    "saved_ratio_percent": 87.6,
+    "secondary_loaded": [],
+    "notes": [
+      "flash-card：已为「crazy」生成 crazy.html"
+    ]
+  },
+  {
+    "message": "画一个系统架构图",
+    "matched": "baoyu-diagram",
+    "progressive_tokens": 4094,
+    "full_load_tokens": 7812,
+    "saved_ratio_percent": 47.6,
+    "secondary_loaded": [
+      "references/architecture.md"
+    ],
+    "notes": [
+      "baoyu-diagram：推断类型 → architecture.md；可用参考文档 4 个"
+    ]
+  },
+  {
+    "message": "帮我做个 PPT slides",
+    "matched": "pptx",
+    "progressive_tokens": 392,
+    "full_load_tokens": 7812,
+    "saved_ratio_percent": 95.0,
+    "secondary_loaded": [],
+    "notes": [
+      "pptx：已生成执行计划（scripts=0, refs=0）"
+    ]
+  },
+  {
+    "message": "请帮我 code review 这段改动",
+    "matched": "code-review",
+    "progressive_tokens": 445,
+    "full_load_tokens": 7812,
+    "saved_ratio_percent": 94.3,
+    "secondary_loaded": [],
+    "notes": [
+      "code-review：已生成执行计划（scripts=0, refs=0）"
+    ]
+  },
+  {
+    "message": "随便聊聊今天天气",
+    "matched": null,
+    "progressive_tokens": 181,
+    "full_load_tokens": 7812,
+    "saved_ratio_percent": 97.7,
+    "secondary_loaded": [],
+    "notes": [
+      "未匹配 Skill，跳过执行。"
+    ]
+  }
+]

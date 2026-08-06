@@ -1,0 +1,6 @@
+# Skills Index
+
+- [baoyu-diagram](baoyu-diagram/SKILL.md) — 创建专业的暗色主题 SVG 图表，支持任意类型——架构图、流程图、...
+- [code-review](code-review/SKILL.md) — 代码审查
+- [flash-card](flash-card/SKILL.md) — 为一个英语单词生成静态 HTML 学习闪卡（含音标、词性、释义、3...
+- [pptx](pptx/SKILL.md) — PPT 生成与编辑
