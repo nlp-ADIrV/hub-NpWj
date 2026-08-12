@@ -1,0 +1,105 @@
+{
+  "description": "简易配送 Skill 压缩演示：6 条 Dev 与 6 条 Holdout，覆盖运费、配送方式和订单取消。Optimizer 只能看到 Dev 失败。",
+  "source": {
+    "project": "week14_simple_shipping_demo",
+    "policies_sha256": "18e4ddb6a850ae3524ef0dc3cbd17b4e80cba1110fbf7adc67bc986cd46c41a5",
+    "purpose": "用于展示完整 Skill 在质量不下降前提下压缩 Prompt Token，不代表生产政策。"
+  },
+  "splits": {
+    "dev": [1, 2, 3, 4, 5, 6],
+    "holdout": [7, 8, 9, 10, 11, 12]
+  },
+  "cases": [
+    {
+      "id": 1,
+      "category": "shipping_fee",
+      "question": "我是普通用户，买了120元商品，选择普通配送，需要运费吗？",
+      "required": ["免", "99"],
+      "forbidden": []
+    },
+    {
+      "id": 2,
+      "category": "shipping_fee",
+      "question": "我是VIP，只买了50元商品，普通配送收多少钱？",
+      "required": ["VIP", "免"],
+      "forbidden": []
+    },
+    {
+      "id": 3,
+      "category": "delivery_mode",
+      "question": "上海订单实付120元，改成加急配送后总运费是多少？",
+      "required": ["15", "加急"],
+      "forbidden": [],
+      "critical": true
+    },
+    {
+      "id": 4,
+      "category": "delivery_mode",
+      "question": "收货地址在新疆，可以选择1到2天的加急配送吗？",
+      "required": ["不支持", "加急"],
+      "forbidden": ["可以"],
+      "critical": true
+    },
+    {
+      "id": 5,
+      "category": "cancellation",
+      "question": "订单还没有发货，我现在取消，退款会怎么处理？",
+      "required": ["取消", "原路", "24"],
+      "forbidden": ["退货"]
+    },
+    {
+      "id": 6,
+      "category": "cancellation",
+      "question": "订单已经发货了，我还能直接取消吗？",
+      "required": ["不能", "签收", "退货"],
+      "forbidden": ["可以直接取消"],
+      "critical": true
+    },
+    {
+      "id": 7,
+      "category": "shipping_fee",
+      "question": "普通用户买了50元商品，寄到上海并选择普通配送，运费是多少？",
+      "required": ["8"],
+      "forbidden": ["免运费"]
+    },
+    {
+      "id": 8,
+      "category": "shipping_fee",
+      "question": "VIP买了50元商品寄到西藏，选择普通配送，一共要付多少运费？",
+      "required": ["10", "附加费"],
+      "forbidden": ["完全免费"],
+      "critical": true
+    },
+    {
+      "id": 9,
+      "category": "delivery_mode",
+      "question": "普通用户买了50元商品寄到新疆，普通配送总运费怎么算？",
+      "required": ["18", "10"],
+      "forbidden": [],
+      "critical": true
+    },
+    {
+      "id": 10,
+      "category": "delivery_mode",
+      "question": "普通用户买了30元商品寄到上海，选择加急配送，总运费是多少？",
+      "required": ["23", "15"],
+      "forbidden": [],
+      "critical": true
+    },
+    {
+      "id": 11,
+      "category": "cancellation",
+      "question": "订单显示待发货，取消后钱退到哪里，大约多久？",
+      "required": ["原路", "24"],
+      "forbidden": ["退货"]
+    },
+    {
+      "id": 12,
+      "category": "cancellation",
+      "question": "包裹已经在运输途中，但我不想要了，应该怎么办？",
+      "required": ["签收", "退货"],
+      "forbidden": ["直接取消"],
+      "critical": true
+    }
+  ]
+}
