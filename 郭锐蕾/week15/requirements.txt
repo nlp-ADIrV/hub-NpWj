@@ -1,0 +1,8 @@
+# ── 市场调研 Subagent 并行系统运行时依赖 ──────────────────────────
+# LLM 走 OpenAI 兼容接口（DeepSeek）
+openai>=1.40.0
+
+# 联网搜索走 Tavily REST API，用标准库 urllib 调用，无需 tavily-python SDK
+# 仅需环境变量：TAVILY_API_KEY、DEEPSEEK_API_KEY
+
+# ReAct 引擎 + 并行编排 + CLI 全部手写，零额外依赖
