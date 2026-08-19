@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>week16 大模型结构演进 — 模型架构对比报告</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e3e8ef;
+    --text: #1f2733;
+    --text2: #5b6675;
+    --accent: #2f6fed;
+    --accent2: #7a5af8;
+    --green: #12805c;
+    --red: #c0392b;
+    --amber: #b9770e;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(16,24,40,.06), 0 4px 16px rgba(16,24,40,.05);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    line-height: 1.65; padding: 40px 20px 80px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 30px; letter-spacing:-.5px; margin-bottom:6px; }
+  .sub { color: var(--text2); font-size: 15px; margin-bottom: 28px; }
+  h2 {
+    font-size: 21px; margin: 44px 0 18px; padding-left: 12px;
+    border-left: 4px solid var(--accent); line-height: 1.3;
+  }
+  .card {
+    background: var(--card); border:1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px 24px; margin-bottom: 18px;
+  }
+  table { width:100%; border-collapse: collapse; font-size: 13.5px; background:#fff; }
+  th, td { padding: 9px 10px; border:1px solid var(--border); text-align:left; vertical-align: top; }
+  th { background:#f0f3f8; font-weight:600; white-space:nowrap; }
+  td code { background:#eef2f7; padding:1px 6px; border-radius:4px; font-size:12px; color:#27406b; }
+  .tag {
+    display:inline-block; padding:2px 9px; border-radius:20px;
+    font-size:11.5px; font-weight:600; margin:2px 3px 2px 0; white-space:nowrap;
+  }
+  .t-blue { background:#e8f0fe; color:#1a56db; }
+  .t-purple { background:#f1ecfe; color:#6d3fd6; }
+  .t-green { background:#e5f6ef; color:#0e7a53; }
+  .t-amber { background:#fdf3e3; color:#a86a06; }
+  .t-red { background:#fdeceb; color:#c0392b; }
+  .t-gray { background:#eef1f5; color:#5b6675; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
+  @media (max-width: 900px){ .grid2,.grid3{ grid-template-columns:1fr; } }
+  .model-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); }
+  .model-card h3 { font-size:16px; margin-bottom:4px; }
+  .model-card .cls { color:var(--text2); font-size:12px; margin-bottom:10px; font-family:Consolas,Monaco,monospace; }
+  .model-card .loc { font-size:12px; color:var(--text2); background:#f5f7fa; border-radius:6px; padding:6px 8px; margin-bottom:10px; font-family:Consolas,Monaco,monospace; word-break:break-all; }
+  .model-card .desc { font-size:13.5px; color:var(--text); }
+  .model-card .desc b { color:var(--accent); }
+  .kv { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  ul { padding-left:20px; }
+  li { margin-bottom: 6px; font-size: 14px; }
+  .note { background:#fff8e6; border:1px solid #f3dfa0; border-radius:8px; padding:12px 16px; font-size:13.5px; margin:14px 0; color:#7a5a10; }
+  .legend { display:flex; gap:12px; flex-wrap:wrap; margin:10px 0 4px; font-size:12.5px; color:var(--text2); }
+  .pill { display:inline-flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .flow { font-family:Consolas,Monaco,monospace; font-size:12px; line-height:2; }
+  .flow span { padding:2px 6px; border-radius:4px; margin-right:4px; }
+  .f-full { background:#e8f0fe; color:#1a56db; }
+  .f-linear { background:#f1ecfe; color:#6d3fd6; }
+  .f-slide { background:#e5f6ef; color:#0e7a53; }
+  .f-comp { background:#fdf3e3; color:#a86a06; }
+  .footer { margin-top:50px; color:var(--text2); font-size:12.5px; text-align:center; }
+  .status-ok { color:var(--green); font-weight:600; }
+  .status-missing { color:var(--red); font-weight:600; }
+  /* ===== 教程样式 ===== */
+  .tut { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:22px 26px; margin-bottom:22px; box-shadow:var(--shadow); }
+  .tut h3 { font-size:18px; margin-bottom:6px; }
+  .tut .en { font-size:12.5px; color:var(--text2); margin-bottom:14px; font-family:Consolas,Monaco,monospace; }
+  .tut h4 { font-size:15px; margin:18px 0 8px; color:var(--accent); }
+  .tut p { font-size:14px; margin-bottom:10px; }
+  .tut ul, .tut ol { margin-bottom:10px; }
+  .tut li { font-size:13.5px; margin-bottom:5px; }
+  .eq {
+    background:#f6f8fc; border:1px solid #dfe6f2; border-left:4px solid var(--accent);
+    border-radius:6px; padding:10px 16px; margin:10px 0; font-family:Consolas,Georgia,"Times New Roman",monospace;
+    font-size:13.5px; color:#24344d; overflow-x:auto; line-height:1.9;
+  }
+  .eq .c { color:var(--text2); font-size:12px; font-family:inherit; }
+  .codeblock {
+    background:#0f172a; color:#d7e3f4; border-radius:8px; padding:14px 18px; margin:12px 0;
+    font-family:Consolas,Monaco,monospace; font-size:12.5px; line-height:1.75; overflow-x:auto; white-space:pre;
+  }
+  .codeblock .k { color:#7dd3fc; } .codeblock .f { color:#fbbf24; } .codeblock .s { color:#86efac; }
+  .proscons { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0; }
+  @media (max-width:900px){ .proscons{ grid-template-columns:1fr; } }
+  .pc { border-radius:8px; padding:12px 16px; font-size:13.5px; }
+  .pc.pro { background:#e5f6ef; border:1px solid #bfe8d6; }
+  .pc.con { background:#fdeceb; border:1px solid #f5c6c2; }
+  .pc b { display:block; margin-bottom:4px; }
+  .fig {
+    background:#f6f8fc; border:1px solid #dfe6f2; border-radius:8px; padding:12px 16px;
+    font-family:Consolas,Monaco,monospace; font-size:12px; color:#24344d; overflow-x:auto; line-height:1.8; white-space:pre; margin:10px 0;
+  }
+  .subcap { font-size:12px; color:var(--text2); margin:-4px 0 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧠 week16 · 大模型结构演进 — 多模型架构对比报告</h1>
+  <div class="sub">基于 transformers 5.15.0 源码 + 本地模型实现，对 Qwen3.8 / Dots3 / DeepSeek V3·V4 / Kimi K3 / GLM-5.2 的架构做横向剖析</div>
+
+  <!-- ============ 1. transformers 实现定位 ============ -->
+  <h2>一、transformers 库中对应实现定位</h2>
+  <div class="card">
+    <table>
+      <tr><th>配置文件</th><th>architectures（类名）</th><th>model_type</th><th>transformers 5.15.0 实现</th><th>状态</th></tr>
+      <tr>
+        <td>Qwen3.8-2.4T-A95B</td>
+        <td><code>Qwen3_5MoeForCausalLM</code></td>
+        <td><code>qwen3_5_moe_text</code></td>
+        <td><code>models/qwen3_5_moe/modeling_qwen3_5_moe.py</code></td>
+        <td class="status-ok">✅ 已收录</td>
+      </tr>
+      <tr>
+        <td>Qwen3.8-27B</td>
+        <td><code>Qwen3_5ForConditionalGeneration</code></td>
+        <td><code>qwen3_5</code></td>
+        <td><code>models/qwen3_5/modeling_qwen3_5.py</code></td>
+        <td class="status-ok">✅ 已收录</td>
+      </tr>
+      <tr>
+        <td>dots3-note-prev</td>
+        <td><code>Dots3NoteForCausalLM</code></td>
+        <td><code>dots3_note</code></td>
+        <td>⚠️ 5.15.0 未收录（仅有 <code>dots1</code> / <code>Dots1ForCausalLM</code>）</td>
+        <td class="status-missing">❌ 未收录</td>
+      </tr>
+      <tr>
+        <td>DeepSeek-V3</td>
+        <td><code>DeepseekV3ForCausalLM</code></td>
+        <td><code>deepseek_v3</code></td>
+        <td><code>models/deepseek_v3/modeling_deepseek_v3.py</code></td>
+        <td class="status-ok">✅ 已收录</td>
+      </tr>
+      <tr>
+        <td>DeepSeek-V4-Flash / Pro</td>
+        <td><code>DeepseekV4ForCausalLM</code></td>
+        <td><code>deepseek_v4</code></td>
+        <td><code>models/deepseek_v4/modeling_deepseek_v4.py</code></td>
+        <td class="status-ok">✅ 已收录</td>
+      </tr>
+      <tr>
+        <td>Kimi-K3</td>
+        <td><code>KimiK3ForConditionalGeneration</code></td>
+        <td><code>kimi_k3</code> / <code>kimi_linear</code></td>
+        <td>⚠️ 5.15.0 未收录（仅有 <code>kimi_k25</code>，文本侧复用 deepseek_v3）；本地配套 <code>kimi_k3_modeling.py</code> / <code>kimi_k3_linear_modeling.py</code></td>
+        <td class="status-missing">❌ 未收录（有本地实现）</td>
+      </tr>
+      <tr>
+        <td>GLM-5.2</td>
+        <td><code>GlmMoeDsaForCausalLM</code></td>
+        <td><code>glm_moe_dsa</code></td>
+        <td><code>models/glm_moe_dsa/modeling_glm_moe_dsa.py</code></td>
+        <td class="status-ok">✅ 已收录</td>
+      </tr>
+    </table>
+    <div class="note">📌 <b>注意</b>：Dots3-Note 与 Kimi-K3 在 transformers 5.15.0 尚未官方收录（Kimi-K3 的本地代码可直接加载）。Dots3 与已收录的 <code>dots1</code> 同源（NVIDIA Dots 系列），可参考 Dots1 的实现模式。配置文件中的 <code>transformers_version</code> 字段提示其出自更新版本。</div>
+  </div>
+
+  <!-- ============ 2. 各模型架构卡片 ============ -->
+  <h2>二、逐模型架构速览</h2>
+
+  <div class="grid2">
+    <div class="model-card">
+      <h3>① Qwen3.8-2.4T-A95B</h3>
+      <div class="cls">Qwen3_5MoeForCausalLM · qwen3_5_moe_text</div>
+      <div class="loc">transformers/models/qwen3_5_moe/modeling_qwen3_5_moe.py</div>
+      <div class="kv">
+        <span class="tag t-purple">线性注意力混合</span><span class="tag t-blue">MoE 512</span>
+        <span class="tag t-amber">MTP×1</span><span class="tag t-gray">92 层</span>
+      </div>
+      <div class="desc">
+        每 <b>4 层插 1 个全注意力</b>（linear×3 + full×1 循环）。<br>
+        <b>线性层</b>：GatedDeltaNet（短卷积 conv1d k=4 + 门控 Delta Rule 递推，key 16 头 / value 128 头，每头 128 维）。<br>
+        <b>全注意力层</b>：标准 MHA（64 头 × 256 维），加 q/k RMSNorm、partial RoPE（25%）、输出 sigmoid 门控。<br>
+        <b>MoE</b>：512 专家取 top-10 + 1 共享专家 + 门控，SwiGLU；<b>MTP</b> 1 层多 token 预测。
+      </div>
+    </div>
+
+    <div class="model-card">
+      <h3>② Qwen3.8-27B（多模态）</h3>
+      <div class="cls">Qwen3_5ForConditionalGeneration · qwen3_5</div>
+      <div class="loc">transformers/models/qwen3_5/modeling_qwen3_5.py</div>
+      <div class="kv">
+        <span class="tag t-purple">线性注意力混合</span><span class="tag t-green">Dense MLP</span>
+        <span class="tag t-amber">MTP×1</span><span class="tag t-gray">64 层文本</span>
+      </div>
+      <div class="desc">
+        Qwen3.8 的<b>稠密版</b>（与 Qwen3.6-27B 同构）。文本侧 64 层，同样 <b>linear×3 + full×1</b> 循环；FFN 为稠密 SwiGLU（intermediate 17408）。<br>
+        <b>视觉塔</b>：27 层 ViT，patch16 + temporal_patch2，1152 维，输出 5120 接投影。<br>
+        linear 层：key 16 头 / value 48 头；全注意力 24 头 × 256 维、4 个 KV 头（GQA）。
+      </div>
+    </div>
+
+    <div class="model-card">
+      <h3>③ Dots3-Note</h3>
+      <div class="cls">Dots3NoteForCausalLM · dots3_note（未收录）</div>
+      <div class="loc">本地仅 config；参考 transformers/models/dots1/（Dots 家族）</div>
+      <div class="kv">
+        <span class="tag t-green">滑动窗口</span><span class="tag t-blue">MLA</span>
+        <span class="tag t-amber">索引器 top-2048</span><span class="tag t-gray">46 层</span>
+      </div>
+      <div class="desc">
+        层型：<b>full×2 + sliding×3 循环</b>；滑动窗口 513。<br>
+        <b>MLA</b>（DeepSeek 式）：q_lora 1024 / kv_lora 512 / qk_nope 128 / qk_rope 64 / v_head 128；滑动层有独立 swa_* MLA 参数。<br>
+        <b>索引器</b>：64 头 × 128 维，top-2048（DSA/索引稀疏注意力）。<br>
+        <b>MoE</b> 256 路由专家 top-8 + 1 共享；多模态（视觉 42 层 + Whisper 音频编码器）；上下文 512K。
+      </div>
+    </div>
+
+    <div class="model-card">
+      <h3>④ DeepSeek-V3</h3>
+      <div class="cls">DeepseekV3ForCausalLM · deepseek_v3</div>
+      <div class="loc">transformers/models/deepseek_v3/modeling_deepseek_v3.py</div>
+      <div class="kv">
+        <span class="tag t-blue">纯 MLA</span><span class="tag t-red">分组路由</span>
+        <span class="tag t-amber">MTP×1</span><span class="tag t-gray">61 层</span>
+      </div>
+      <div class="desc">
+        <b>全层 MLA</b>（Multi-head Latent Attention）：q_lora 1536 / kv_lora 512 / qk_nope 128 / qk_rope 64 / v_head 128，KV 以低秩潜变量缓存，<b>省 90%+ KV 缓存</b>。<br>
+        <b>MoE</b>：256 路由专家 top-8 + 1 共享，<b>分组路由</b>（8 组选 4 组）保证专家负载均衡；前 3 层稠密；YaRN 长文本 128K+；<b>MTP</b> 多 token 预测。
+      </div>
+    </div>
+
+    <div class="model-card">
+      <h3>⑤ DeepSeek-V4（Flash / Pro）</h3>
+      <div class="cls">DeepseekV4ForCausalLM · deepseek_v4</div>
+      <div class="loc">transformers/models/deepseek_v4/modeling_deepseek_v4.py</div>
+      <div class="kv">
+        <span class="tag t-amber">压缩注意力 HCA/CSA</span><span class="tag t-red">索引器</span>
+        <span class="tag t-purple">超连接</span><span class="tag t-gray">43/61 层</span>
+      </div>
+      <div class="desc">
+        三种层型：<b>sliding / CSA / HCA</b>。<br>
+        <b>HCA</b>：每 128 个 token 压成 1 个重度压缩 KV；<b>CSA</b>：每 4 个压 1 个 + <b>Lightning Indexer</b>（64 头×128 维，top-512/1024）选出 top-k 压缩块；<b>sliding</b> 窗口 128。<br>
+        单 KV 头共享（K=V）、partial RoPE、attention sink、分组低秩输出投影（o_groups）；<b>Hyper-Connection</b> 超连接残差；fp4 专家 + FP8 权重；MTP×1。
+      </div>
+    </div>
+
+    <div class="model-card">
+      <h3>⑥ Kimi-K3</h3>
+      <div class="cls">KimiK3ForConditionalGeneration · kimi_k3 / kimi_linear（未收录）</div>
+      <div class="loc">本地：kimi_k3_linear_modeling.py（文本）+ kimi_k3_modeling.py（多模态外壳）</div>
+      <div class="kv">
+        <span class="tag t-purple">KDA 线性注意力</span><span class="tag t-blue">MLA</span>
+        <span class="tag t-red">896 专家</span><span class="tag t-gray">93 层</span>
+      </div>
+      <div class="desc">
+        层混合：<b>66 层 KDA + 24 层 MLA</b>（约 3:1，full 层位于 4,8,12…92,93）。<br>
+        <b>KDA</b>（Kimi Delta Attention）：线性注意力，短卷积 k=4 + Delta Rule chunk 递推，96 头×128 维。<br>
+        <b>MLA</b>：q_lora 1536 / kv_lora 512，nope 128 + rope 64。<br>
+        <b>MoE</b> 896 路由专家 top-16 + 2 共享（分组 topk），latent MoE；SiTU 激活 + attn 残差（res_block 12）；视觉塔 27 层；上下文 1M。
+      </div>
+    </div>
+
+    <div class="model-card">
+      <h3>⑦ GLM-5.2</h3>
+      <div class="cls">GlmMoeDsaForCausalLM · glm_moe_dsa</div>
+      <div class="loc">transformers/models/glm_moe_dsa/modeling_glm_moe_dsa.py</div>
+      <div class="kv">
+        <span class="tag t-blue">MLA + DSA</span><span class="tag t-amber">索引器 top-2048</span>
+        <span class="tag t-red">跨层共享 top-k</span><span class="tag t-gray">78 层</span>
+      </div>
+      <div class="desc">
+        <b>MLA + DSA 索引器</b>：MLA（q_lora 2048 / kv_lora 512 / nope 192 + rope 64 / v_head 256）+ 32 头×128 维索引器选出 top-2048 稀疏键。<br>
+        <b>跨层 top-k 共享</b>：indexer_types 每 4 层 1 个 full、其余 shared 复用前一 full 层的 top-k 选择，省索引器计算。<br>
+        MoE 256 专家 top-8 + 1 共享；前 3 层稠密；MTP×1。
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3. 核心对比表 ============ -->
+  <h2>三、核心架构对比表</h2>
+  <div class="card" style="overflow-x:auto;">
+    <table style="min-width:1000px;">
+      <tr>
+        <th>维度</th><th>Qwen3.8-MoE</th><th>Qwen3.8-27B</th><th>Dots3-Note</th>
+        <th>DeepSeek-V3</th><th>DeepSeek-V4</th><th>Kimi-K3</th><th>GLM-5.2</th>
+      </tr>
+      <tr>
+        <td><b>层数</b></td><td>92</td><td>64</td><td>46</td><td>61</td><td>43 / 61</td><td>93</td><td>78</td>
+      </tr>
+      <tr>
+        <td><b>注意力主型</b></td>
+        <td>GatedDeltaNet 线性 + MHA</td>
+        <td>GatedDeltaNet 线性 + MHA</td>
+        <td>MLA + 滑动窗口</td>
+        <td>MLA（纯）</td>
+        <td>共享 KV MQA + 压缩</td>
+        <td>KDA 线性 + MLA</td>
+        <td>MLA + DSA 索引</td>
+      </tr>
+      <tr>
+        <td><b>稀疏化手段</b></td>
+        <td>线性注意力（免 KV 缓存）</td>
+        <td>线性注意力（免 KV 缓存）</td>
+        <td>窗口 + 索引器 top-2048</td>
+        <td>—（靠 MLA 省缓存）</td>
+        <td>HCA/CSA 压缩 + 索引器</td>
+        <td>线性注意力（免 KV 缓存）</td>
+        <td>索引器 top-2048 + 跨层共享</td>
+      </tr>
+      <tr>
+        <td><b>MoE 专家数</b></td>
+        <td>512</td><td>—（Dense）</td><td>256</td><td>256</td><td>256 / 384</td><td><b>896</b></td><td>256</td>
+      </tr>
+      <tr>
+        <td><b>每 token 激活</b></td>
+        <td>top-10 + 1 共享</td><td>—</td><td>top-8 + 1 共享</td><td>top-8 + 1 共享（分组）</td><td>top-6 + 1 共享</td><td>top-16 + 2 共享</td><td>top-8 + 1 共享</td>
+      </tr>
+      <tr>
+        <td><b>FFN 激活</b></td><td>SwiGLU</td><td>SwiGLU</td><td>SwiGLU</td><td>SwiGLU</td><td>SwiGLU</td><td><b>SiTU</b></td><td>SwiGLU</td>
+      </tr>
+      <tr>
+        <td><b>归一化</b></td><td>RMSNorm(+gated)</td><td>RMSNorm(+gated)</td><td>RMSNorm</td><td>RMSNorm</td><td>RMSNorm</td><td>RMSNorm</td><td>RMSNorm</td>
+      </tr>
+      <tr>
+        <td><b>位置编码</b></td><td>partial RoPE 25%</td><td>partial RoPE 25% + mRoPE</td><td>RoPE + swa 独立</td><td>YaRN RoPE</td><td>partial + compress 双 RoPE</td><td>RoPE</td><td>interleaved RoPE</td>
+      </tr>
+      <tr>
+        <td><b>MTP 多 token</b></td><td>✅ 1 层</td><td>✅ 1 层</td><td>—</td><td>✅ 1 层</td><td>✅ 1 层</td><td>—（0）</td><td>✅ 1 层</td>
+      </tr>
+      <tr>
+        <td><b>多模态</b></td><td>—（文本）</td><td>视觉 27 层</td><td>视觉 42 层 + 音频</td><td>—</td><td>—</td><td>视觉 27 层</td><td>—</td>
+      </tr>
+      <tr>
+        <td><b>上下文</b></td><td>262K</td><td>262K</td><td>524K</td><td>163K</td><td>1M</td><td>1M</td><td>1M</td>
+      </tr>
+      <tr>
+        <td><b>特色结构</b></td><td>attn 输出门控</td><td>attn 输出门控</td><td>swa/MLA 双参数集</td><td>分组路由</td><td>Hyper-Connection、sink、分组低秩输出</td><td>attn 残差块、latent MoE</td><td>跨层共享索引 top-k</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============ 4. 层型分布 ============ -->
+  <h2>四、层型分布（Token Mixer 排版）</h2>
+  <div class="card">
+    <div class="legend">
+      <span class="pill"><span class="dot" style="background:#1a56db"></span>全注意力 Full</span>
+      <span class="pill"><span class="dot" style="background:#6d3fd6"></span>线性注意力 Linear</span>
+      <span class="pill"><span class="dot" style="background:#0e7a53"></span>滑动窗口 Sliding</span>
+      <span class="pill"><span class="dot" style="background:#a86a06"></span>压缩/索引 Compressed</span>
+    </div>
+    <div class="flow">
+      <b>Qwen3.8-MoE (92)</b> &nbsp;<span class="f-linear">L</span><span class="f-linear">L</span><span class="f-linear">L</span><span class="f-full">F</span> × 23<br>
+      <b>Qwen3.8-27B (64)</b> &nbsp;<span class="f-linear">L</span><span class="f-linear">L</span><span class="f-linear">L</span><span class="f-full">F</span> × 16<br>
+      <b>Dots3-Note (46)</b> &nbsp;<span class="f-full">F</span><span class="f-full">F</span><span class="f-slide">S</span><span class="f-slide">S</span><span class="f-slide">S</span> × 9 + <span class="f-full">F</span><br>
+      <b>DeepSeek-V3 (61)</b> &nbsp;<span class="f-full">F</span><span class="f-full">F</span><span class="f-full">F</span><span class="f-full">F</span> × 15 + <span class="f-full">F</span>（全部 MLA）<br>
+      <b>DeepSeek-V4 (43)</b> &nbsp;<span class="f-slide">S</span><span class="f-comp">C</span><span class="f-comp">C</span><span class="f-comp">C</span><span class="f-comp">C</span>…（sliding/CSA/HCA 按 compress_ratios 排布）<br>
+      <b>Kimi-K3 (93)</b> &nbsp;<span class="f-linear">K</span><span class="f-linear">K</span><span class="f-linear">K</span><span class="f-full">M</span> … 66 KDA + 24 MLA（KDA 为主，每 4 层 1 MLA）<br>
+      <b>GLM-5.2 (78)</b> &nbsp;<span class="f-full">F</span><span class="f-full">F</span><span class="f-full">F</span><span class="f-comp">S</span><span class="f-comp">S</span><span class="f-comp">S</span><span class="f-full">F</span>…（每 4 层 1 个 full 索引层，其余 shared）<br>
+    </div>
+    <div class="note">💡 两条主流技术路线一目了然：<b>① 线性注意力路线</b>（Qwen3.5/Kimi 用 Delta-Rule 系线性注意力替代大部分全注意力，省 KV 缓存）；<b>② 稀疏索引路线</b>（DeepSeek V4/GLM/Dots 用索引器+压缩 KV 只让每个 query 看 top-k 个键）。DeepSeek-V3 则走第三条：全量 MLA 低秩压缩。</div>
+  </div>
+
+  <!-- ============ 5. 相同点 ============ -->
+  <h2>五、相同之处（共性设计）</h2>
+  <div class="card">
+    <ul>
+      <li>✅ <b>Decoder-only + 因果自回归</b>：全部是单向 decoder，无一例外。</li>
+      <li>✅ <b>RMSNorm</b>：全部采用 RMSNorm 而非 LayerNorm（无均值中心化、参数更省）；部分引入 gated RMSNorm。</li>
+      <li>✅ <b>SwiGLU / SiLU 门控 FFN</b>：除 Kimi 用 SiTU（SiLU 变体）外，全部 SwiGLU（gate/up/down 三段式）。</li>
+      <li>✅ <b>RoPE 旋转位置编码</b>：全部基于 RoPE（区别在 partial 比例 / YaRN 长文本 / interleaved 排列）。</li>
+      <li>✅ <b>MoE 稀疏专家 + 共享专家</b>：除 Qwen3.8-27B 稠密版外全部 MoE，且都带 1~2 个共享专家 + sigmoid/softmax 路由 + 负载均衡设计（aux loss / 分组 / hash）。</li>
+      <li>✅ <b>KV 缓存压缩是主线</b>：MLA 低秩潜变量（DSV3/GLM/Kimi/Dots）或线性注意力免缓存（Qwen/Kimi）或压缩+索引（DSV4）——目的都是降低长上下文内存。</li>
+      <li>✅ <b>多 token 预测 MTP</b>：DeepSeek、GLM、Qwen3.8 均带 1 层 MTP 头，提升推理吞吐与训练效率（Kimi-K3 未启用）。</li>
+      <li>✅ <b>超长上下文</b>：163K ~ 1M token 全覆盖。</li>
+      <li>✅ <b>张量并行友好的 FP8/FP4 量化</b>：DeepSeek 系与 Kimi 配置均带量化配置（fp8/fp4 专家）。</li>
+    </ul>
+  </div>
+
+  <!-- ============ 6. 不同之处 ============ -->
+  <h2>六、不同之处（差异化设计）</h2>
+  <div class="card">
+    <ul>
+      <li>🔀 <b>注意力机制分四派</b>：
+        <br>&nbsp;&nbsp;· <b>MLA 派</b>：DeepSeek-V3、GLM-5.2、Dots3、Kimi(部分) —— KV 先压到低秩潜变量再展开，缓存压缩比最高；
+        <br>&nbsp;&nbsp;· <b>线性注意力派</b>：Qwen3.8、Kimi-K3 —— Gated DeltaNet/KDA，O(1) 状态递推，彻底不存 KV；
+        <br>&nbsp;&nbsp;· <b>稀疏/压缩派</b>：DeepSeek-V4、GLM、Dots —— 索引器先挑 top-k 键再做注意力，复杂度随 top-k 而非序列长；
+        <br>&nbsp;&nbsp;· <b>滑动窗口派</b>：Dots3、DeepSeek-V4、Mistral —— 只看最近 W 个 token，近似线性复杂度，配周期性全注意力层做跨窗中继。</li>
+      <li>🔀 <b>线性层与全注意力层比例不同</b>：Qwen 3:1 固定循环；Kimi 66:24 约 2.75:1；Dots 全层仅 2 full + 滑动窗口；GLM 4 层一 full。</li>
+      <li>🔀 <b>MoE 规模悬殊</b>：Kimi 896 专家 top-16（最宽）；DeepSeek V3 分组路由（8 组挑 4 组）保证均衡；V4 用 Hash Router + fp4 专家。</li>
+      <li>🔀 <b>残差连接风格</b>：DeepSeek-V4 的 Hyper-Connection（3 流残差交互）、Kimi 的 attn 残差块（res_block 12 累积）、其余标准 pre-norm 残差。</li>
+      <li>🔀 <b>多模态范围</b>：Qwen3.8-27B 视觉；Kimi-K3 视觉；Dots3 视觉+音频；DeepSeek/GLM 纯文本。</li>
+      <li>🔀 <b>上下文策略</b>：DSV3 用 YaRN 扩窗；DSV4 用 compress 专用 RoPE(θ=160k)+索引；Qwen 用 partial RoPE + 长训练。</li>
+      <li>🔀 <b>位置编码细节</b>：Qwen 多模态用 mRoPE（多模态 3D 位置）；GLM 用 interleaved RoPE；V4 双 RoPE（main/compress）。</li>
+    </ul>
+  </div>
+
+  <!-- ============ 7. 演进脉络 ============ -->
+  <h2>七、结构演进脉络（week16 主题）</h2>
+  <div class="card">
+    <table>
+      <tr><th>阶段</th><th>代表</th><th>核心动机</th><th>KV 缓存策略</th></tr>
+      <tr>
+        <td><b>标准 Transformer</b></td><td>Llama 系</td><td>基础能力</td><td>全量 KV 缓存，O(seq)</td>
+      </tr>
+      <tr>
+        <td><b>MLA 低秩压缩</b></td><td>DeepSeek-V2/V3、GLM</td><td>省 KV 内存、训推一致</td><td>低秩潜变量缓存（KV 约省 90%）</td>
+      </tr>
+      <tr>
+        <td><b>MoE 规模化</b></td><td>DSV3 671B、Qwen-MoE</td><td>总参数量翻倍、激活量不变</td><td>叠加于 MLA / 线性之上</td>
+      </tr>
+      <tr>
+        <td><b>线性注意力混合</b></td><td>Qwen3.5/3.8、Kimi-K3</td><td>长上下文 O(1) 状态、免 KV 缓存</td><td>恒定大小状态（Delta Rule）</td>
+      </tr>
+      <tr>
+        <td><b>索引稀疏注意力</b></td><td>DeepSeek-V4、GLM-5.2、Dots3</td><td>保留精确注意力、只挑 top-k 键</td><td>压缩块 + 索引器 top-k</td>
+      </tr>
+      <tr>
+        <td><b>多 token 预测 / 多模态</b></td><td>DSV3/4、GLM-5.2、Qwen3.8</td><td>推理吞吐、单模型全模态</td><td>与前述机制叠加</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============ 8. 四大机制教程 ============ -->
+  <h2>八、四大 Token-Mixer 机制详解（教程）</h2>
+  <div class="sub">MLA 低秩潜变量注意力 · Gated DeltaNet 线性注意力 · 压缩+索引稀疏注意力 · 滑动窗口注意力 —— 四者的原理、公式、源码对照与取舍</div>
+
+  <!-- 8.1 MLA -->
+  <div class="tut">
+    <h3>8.1 · MLA：多头潜变量注意力（Multi-head Latent Attention）</h3>
+    <div class="en">DeepSeek-V2 提出 · DeepSeek-V3 / GLM-5.2 / Dots3 / Kimi(部分层) 采用</div>
+
+    <h4>① 解决什么问题</h4>
+    <p>标准 MHA / GQA 在推理时要把每个历史 token 的 <b>K、V 完整缓存</b>，显存随序列长度<b>线性增长</b>：序列 100 万 token、128 头 × 256 维时，仅 KV 缓存就达数百 GB。长上下文（128K~1M）下 KV 缓存是最大的显存瓶颈。</p>
+
+    <h4>② 核心思想</h4>
+    <p>KV 在<b>所有头之间共享</b>，且本身信息冗余 —— 可以先用一个小矩阵把它压成<b>低秩潜向量 c</b>（例如 512 维），缓存时<b>只存这个潜向量</b>（外加一小段 RoPE 旋转的 k<sub>rot</sub>），等真正要做注意力时再用另一个矩阵把它<b>展开回多头 K、V</b>。</p>
+    <div class="eq">
+      <span class="c">// 压缩（缓存前，每 token 只存两个小张量）</span><br>
+      c_KV = W<sub>DKV</sub> · h&nbsp;&nbsp;&nbsp;<span class="c">// 潜向量，kv_lora_rank=512 维，所有头共享</span><br>
+      k<sub>rot</sub> = W<sub>KR</sub> · h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c">// 只带 RoPE 的键片段，qk_rope_head_dim=64 维</span><br><br>
+      <span class="c">// 展开（计算注意力前，恢复多头 K/V）</span><br>
+      [k<sub>nope</sub> | v] = W<sub>UKV</sub> · c_KV&nbsp;&nbsp;<span class="c">// 每头: qk_nope_head_dim + v_head_dim</span><br>
+      k = [k<sub>nope</sub> | RoPE(k<sub>rot</sub>)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c">// 键 = 无位置部分 + 旋转部分</span>
+    </div>
+
+    <h4>③ 缓存压缩比</h4>
+    <p>以 DeepSeek-V3 为例：传统 GQA 需缓存 <code>n_kv_heads × (qk_nope + v_head)</code> 维，而 MLA 只需 <code>kv_lora_rank + qk_rope_head_dim = 512 + 64 = 576</code> 维。展开后的键值维度为 <code>128 × (128+128) = 32768</code> 维 —— <b>缓存量约为展开值的 1/57</b>，官方称较 MHA 压缩约 93%。</p>
+
+    <h4>④ 源码对照（DeepseekV3Attention）</h4>
+    <div class="codeblock"><span class="k">class</span> DeepseekV3Attention:
+    <span class="c"># —— Q 侧降秩升维 ——</span>
+    q_a_proj   = Linear(hidden, q_lora_rank=1536)     <span class="c"># 先压</span>
+    q_a_layernorm = RMSNorm(q_lora_rank)
+    q_b_proj   = Linear(q_lora_rank, n_heads*qk_head_dim) <span class="c"># 再升回多头</span>
+
+    <span class="c"># —— KV 侧压缩 + 展开 ——</span>
+    kv_a_proj_with_mqa = Linear(hidden, kv_lora_rank + qk_rope_head_dim)
+    kv_a_layernorm     = RMSNorm(kv_lora_rank)
+    kv_b_proj          = Linear(kv_lora_rank, n_heads*(qk_nope_head_dim+v_head_dim))
+
+    <span class="c"># forward：压缩 → 缓存 → 展开 → 普通 attention</span>
+    compressed_kv = kv_a_proj_with_mqa(h)          <span class="c"># [B,1,S,576] 只缓存这个</span>
+    kv_nope, k_rot = split(compressed_kv, 512, 64)
+    kv_nope = kv_a_layernorm(kv_nope)
+    k, v = expand_kv(kv_nope, k_rot)               <span class="c"># 展开成多头 KV</span>
+    attn  = attention(q, k, v)</div>
+
+    <h4>⑤ 各模型 MLA 参数差异</h4>
+    <table>
+      <tr><th>模型</th><th>q_lora_rank</th><th>kv_lora_rank</th><th>qk_nope</th><th>qk_rope</th><th>v_head_dim</th><th>备注</th></tr>
+      <tr><td>DeepSeek-V3</td><td>1536</td><td>512</td><td>128</td><td>64</td><td>128</td><td>纯 MLA + 分组路由</td></tr>
+      <tr><td>GLM-5.2</td><td>2048</td><td>512</td><td>192</td><td>64</td><td>256</td><td>MLA + DSA 索引器</td></tr>
+      <tr><td>Dots3-Note</td><td>1024</td><td>512</td><td>128</td><td>64</td><td>128</td><td>swa 层有独立参数集</td></tr>
+      <tr><td>Kimi-K3</td><td>1536</td><td>512</td><td>128</td><td>64</td><td>128</td><td>MLA + 输出门控 g_proj</td></tr>
+    </table>
+    <div class="note">💡 共同点：<code>kv_lora_rank 全部 = 512</code>、<code>qk_rope 全部 = 64</code> —— 这已成为新一代 MLA 的"行业标准尺寸"。</div>
+
+    <div class="proscons">
+      <div class="pc pro"><b>✅ 优点</b>① KV 缓存压缩 ~90%+，长上下文显存友好；② 训练/推理完全一致（不像 MQA/GQA 有信息损失折中）；③ 不牺牲注意力质量，仍是精确注意力。</div>
+      <div class="pc con"><b>❌ 缺点</b>① 只省<b>内存</b>，不省<b>计算</b>——注意力仍是 O(seq²) 的 QK^T 矩阵乘；② 展开时需 kv_b_proj 升维，多一次大矩阵乘；③ 潜向量低秩假设在极长序列下可能丢失细节。</div>
+    </div>
+  </div>
+
+  <!-- 8.2 线性注意力 -->
+  <div class="tut">
+    <h3>8.2 · 线性注意力：Gated DeltaNet / KDA</h3>
+    <div class="en">Linear Attention → Delta Rule → Gated DeltaNet 演进 · Qwen3.8（GatedDeltaNet）与 Kimi-K3（KDA）采用</div>
+
+    <h4>① 解决什么问题</h4>
+    <p>注意力的 <code>softmax(QKᵀ)</code> 是非线性运算，无法拆成可递推的形式，所以必须把历史 K/V <b>全部缓存</b>。线性注意力换一条路：<b>不再保存 KV，而是维护一个固定大小的"记忆状态矩阵 S"</b>，每读一个 token 就把信息<b>写进状态</b>，输出时用查询从状态里<b>读取</b> —— 内存 O(1)、不随序列增长，天然支持无限长上下文。</p>
+
+    <h4>② 三代演化</h4>
+    <div class="eq">
+      <span class="c">第 1 代 · Linear Transformer（2020）：等权累加，无遗忘，容量很快饱和</span><br>
+      S<sub>t</sub> = S<sub>t-1</sub> + k<sub>t</sub> · v<sub>t</sub><sup>T</sup>&nbsp;&nbsp;&nbsp;&nbsp;o<sub>t</sub> = q<sub>t</sub><sup>T</sup> · S<sub>t</sub><br><br>
+      <span class="c">第 2 代 · Delta Rule（2021）：按"预测误差"更新，像 Widrow-Hoff 学习规则</span><br>
+      S<sub>t</sub> = S<sub>t-1</sub> + β<sub>t</sub> · (v<sub>t</sub> − S<sub>t-1</sub>·k<sub>t</sub><sup>T</sup>) · k<sub>t</sub><sup>T</sup><br><br>
+      <span class="c">第 3 代 · Gated DeltaNet（2024）：加入遗忘门 g 与写入门 β，可"选择性遗忘"</span><br>
+      S<sub>t</sub> = g<sub>t</sub>·S<sub>t-1</sub> + β<sub>t</sub>·(v<sub>t</sub> − S<sub>t-1</sub>·k<sub>t</sub><sup>T</sup>)·k<sub>t</sub><sup>T</sup>&nbsp;&nbsp;o<sub>t</sub> = q<sub>t</sub><sup>T</sup>·S<sub>t</sub>
+    </div>
+    <p>其中遗忘门 <code>g = −exp(A_log)·softplus(a + dt_bias) ∈ (0,1)</code>（借自 Mamba 的连续时间离散化），写入门 <code>β = sigmoid(b)</code>。记忆状态 S 大小固定（每头 head_dim × head_dim），训练时用 <b>chunk 并行</b>（把序列切成块分块递推），推理时用 <b>recurrent 模式</b>（单步 O(1)）。</p>
+
+    <h4>③ 源码对照（Qwen3_5MoeGatedDeltaNet）</h4>
+    <div class="codeblock"><span class="k">class</span> Qwen3_5MoeGatedDeltaNet:
+    <span class="c"># —— 输入投影：QKV / 输出门 z / 写入门 b / 遗忘门 a ——</span>
+    in_proj_qkv = Linear(hidden, key_dim*2 + value_dim)  <span class="c"># q,k,v 一次投影</span>
+    in_proj_z   = Linear(hidden, value_dim)               <span class="c"># 输出乘性门控</span>
+    in_proj_b   = Linear(hidden, n_v_heads)               <span class="c"># β = sigmoid(b)</span>
+    in_proj_a   = Linear(hidden, n_v_heads)               <span class="c"># 遗忘门控制</span>
+
+    <span class="c"># —— 短卷积（Mamba 式局部混合） + 门控 Delta Rule 内核 ——</span>
+    conv1d = Conv1d(conv_dim, conv_dim, kernel=4, groups=conv_dim)  <span class="c"># depthwise</span>
+    o, state = torch_chunk_gated_delta_rule(q, k, v, g, beta,
+                A_log, dt_bias, use_qk_l2norm=True)      <span class="c"># 训练: chunk 并行</span>
+    o, state = torch_recurrent_gated_delta_rule(...)      <span class="c"># 推理: 单步递推</span>
+
+    <span class="c"># —— 门控 RMSNorm 输出 ——</span>
+    out = RMSNormGated(o, z)     <span class="c"># norm(o) * sigmoid(z) 之类</span>
+    out = out_proj(out)</div>
+
+    <h4>④ Kimi-K3 KDA 与 Qwen 的差异</h4>
+    <ul>
+      <li><b>投影方式</b>：KDA 用独立的 <code>q_proj / k_proj / v_proj</code>，且每个通道各自接一个短卷积（<code>q_conv1d / k_conv1d / v_conv1d</code>）；Qwen 是 QKV 合一批 + 单一 conv。</li>
+      <li><b>门控</b>：KDA 用两段式 <code>f_a_proj→f_b_proj</code> 生成 g，另有 <code>g_a_proj→g_b_proj</code>（use_full_rank_gate 可选）；Qwen 是 <code>in_proj_a</code> 直出。</li>
+      <li><b>输出</b>：KDA 用 <code>FusedRMSNormGated(activation='sigmoid')</code>；Qwen 用 <code>RMSNormGated(z)</code>。</li>
+      <li><b>安全门</b>：KDA 带 <code>gate_lower_bound=-5.0</code>，防止遗忘门过小导致状态死掉。</li>
+    </ul>
+
+    <h4>⑤ 为什么还要保留 1/4 全注意力？</h4>
+    <p>线性注意力是"有损压缩记忆"：它对需要<b>精确召回</b>的任务（复制、检索、代码中的符号对应）能力弱于精确注意力。所以 Qwen3.8 与 Kimi-K3 都采用<b>混合布局</b>（linear×3 + full×1 循环）——用大部分线性层换效率，保留少量全注意力层做"硬检索"兜底。这是当前业界平衡效率与质量的主流解。</p>
+
+    <div class="proscons">
+      <div class="pc pro"><b>✅ 优点</b>① 推理内存 O(1) 恒定，任意长上下文不涨显存；② 解码每步 O(1) 计算，吞吐极高；③ 训练可用 chunk 并行，不完全牺牲并行度。</div>
+      <div class="pc con"><b>❌ 缺点</b>① 记忆有损：状态容量有限，长程精确召回弱；② Delta Rule 状态在数值上更敏感，需 q/k L2 归一化、门控下界等"维稳"手段；③ 短卷积与递推使 batch 内 padding 处理更复杂。</div>
+    </div>
+  </div>
+
+  <!-- 8.3 压缩+索引 -->
+  <div class="tut">
+    <h3>8.3 · 压缩 + 索引稀疏注意力（HCA / CSA / DSA）</h3>
+    <div class="en">DeepSeek-V4（HCA+CSA+Lightning Indexer）· GLM-5.2（DSA 索引器）· Dots3（索引器）</div>
+
+    <h4>① 解决什么问题</h4>
+    <p>MLA 省了内存但注意力仍是 O(seq²)；线性注意力省了内存又省计算，但有损。压缩+索引想<b>两头都要</b>：保留"精确的 softmax 注意力"，但<b>不让 query 看全部键</b>——先压缩历史，再用一个轻量<b>索引器</b>为每个 query 挑出 top-k 个最重要的压缩块，只对它们做注意力。复杂度从 O(seq²) 降到 <b>O(seq × top-k)</b>。</p>
+
+    <h4>② 三阶段流水线</h4>
+    <div class="fig">
+  历史 token 流  h₁ h₂ h₃ h₄ | h₅ h₆ h₇ h₈ | h₉ ...
+                      │ ① 压缩 Compress（每 m 个 token 压成 1 个压缩块）
+                      ▼
+        压缩 KV 块 C₁     C₂     C₃     ...    （含自身 RoPE，θ=160k 专用）
+                      │ ② 索引 Index（Indexer 打分，挑 top-k）
+                      ▼
+        query t ──►  [C₅  C₂  C₉]  ← top-k 候选块（其余 -inf 屏蔽）
+                      │ ③ 稀疏注意力 Sparse Attend（只算这 k 个块）
+                      ▼
+                   输出 o_t
+    </div>
+
+    <h4>③ 压缩器细节（DeepSeek-V4）</h4>
+    <div class="eq">
+      <span class="c">HCA · 重度压缩（compress_rate=128）：</span><br>
+      C<sub>i</sub> = RMSNorm( Σ<sub>j∈窗口</sub> softmax(Z<sub>j</sub> + B<sub>j</sub>) · C<sub>j</sub> )&nbsp;&nbsp;<span class="c">// softmax 门控加权和</span><br>
+      <span class="c">CSA · 细粒度压缩（compress_rate=4）：</span><br>
+      每个 token 产生两个流 Ca（贡献给下一个窗口）、Cb（贡献给当前窗口）<br>
+      压缩块 = 窗口 w-1 的 Ca 段 ∪ 窗口 w 的 Cb 段（宽度 2m，步长 m）<span class="c">// 重叠布局</span>
+    </div>
+    <p>压缩块的<b>位置编码</b>取窗口起点 <code>i × compress_rate + first_window_position</code>，使用独立的 <code>compress_rope_theta=160000</code> 旋转，保证跨调用拼接时因果性正确。HCA 提供"极长历史"的粗粒度记忆，CSA 提供中近距离的细粒度记忆，两者与滑动窗口（128）拼接后一起参与注意力。</p>
+
+    <h4>④ 索引器（Lightning Indexer / DSA Indexer）</h4>
+    <div class="eq">
+      <span class="c">打分函数：先按头计算 ReLU 相似度，再按头加权求和</span><br>
+      score<sub>t,s</sub> = Σ<sub>h</sub> w<sub>t,h</sub> · ReLU( q<sub>t,h</sub> · K<sup>IComp</sup><sub>s</sub> )<br>
+      <span class="c">然后每 query 取 top-k：</span> indices = topk(score, k=index_topk)<br>
+      <span class="c">因果约束：指向未来窗口的候选被替换为 -1 哨兵（无效）</span>
+    </div>
+    <ul>
+      <li><b>DeepSeek-V4</b>：索引器自带一个小号压缩器（index_head_dim=128），64 头，top-k = 512（Flash）/ 1024（Pro）。</li>
+      <li><b>GLM-5.2</b>：32 头 × 128 维，top-2048；<b>跨层共享</b>——indexer_types 每 4 层 1 个 full（自算 top-k），其余 shared 层直接复用前一 full 层的索引结果，省 3/4 索引器计算。</li>
+      <li><b>Dots3</b>：64 头 × 128 维，top-2048，配合滑动窗口 513 使用。</li>
+    </ul>
+
+    <h4>⑤ 源码对照（DeepseekV4CSACompressor + Indexer）</h4>
+    <div class="codeblock"><span class="k">class</span> DeepseekV4CSACompressor:      <span class="c"># 每 4 token 压 1</span>
+    kv_proj  = Linear(hidden, 2*head_dim)     <span class="c"># 双流 Ca/Cb</span>
+    gate_proj= Linear(hidden, 2*head_dim)     <span class="c"># softmax 门控</span>
+    position_bias = Parameter(rate, 2*head_dim)
+    kv_norm  = RMSNorm(head_dim); rotary_emb = DeepseekV4RotaryEmbedding(θ=160k)
+    indexer  = DeepseekV4Indexer(config)      <span class="c"># 内嵌 Lightning Indexer</span>
+
+<span class="k">class</span> DeepseekV4Indexer:
+    kv_proj = Linear(hidden, 2*index_head_dim)   <span class="c"># 小号压缩器</span>
+    q_b_proj= Linear(q_lora_rank, n_heads*index_head_dim)
+    scorer  = IndexerScorer(weights_proj)        <span class="c"># Σ w·ReLU(q·k)</span>
+    <span class="c"># forward: 压缩 → scorer 打分 → topk → 因果哨兵 -1</span>
+    top_k_indices = index_scores.topk(index_topk).indices
+
+<span class="c"># Attention.forward 最终：</span>
+kv = cat([sliding_kv, compressed_kv], dim=2)      <span class="c"># 滑动窗口 KV + 压缩块</span>
+block_bias = 只在 top-k 索引处置 0，其余 -inf       <span class="c"># 屏蔽未选中的块</span>
+attn_output = attention(q, kv, kv, mask + block_bias)</div>
+
+    <div class="proscons">
+      <div class="pc pro"><b>✅ 优点</b>① 保留精确 softmax 注意力，无有损记忆；② 计算 O(seq×topk)，长上下文大幅提速；③ 压缩块同时降内存（约 m 倍）；④ 索引器可跨层共享（GLM）进一步省算。</div>
+      <div class="pc con"><b>❌ 缺点</b>① 索引器若选错 top-k 会漏掉重要信息（recall 风险）；② 需要压缩器+索引器两套额外参数与两套 cache；③ 实现复杂度最高（Ca/Cb 重叠、跨调用状态、因果哨兵）；④ 索引打分本身也要维护 KV。</div>
+    </div>
+  </div>
+
+  <!-- 8.4 滑动窗口 -->
+  <div class="tut">
+    <h3>8.4 · 滑动窗口注意力（Sliding Window Attention）</h3>
+    <div class="en">Dots3-Note（窗口 513）· DeepSeek-V4（窗口 128）· Mistral / Longformer 同源思想</div>
+
+    <h4>① 解决什么问题</h4>
+    <p>全注意力每个 query 都要和<b>全部历史</b>做点积，计算与显存都是 O(seq²)，长序列下开销随长度二次方膨胀。但研究发现：注意力权重其实高度<b>局部化</b>——与 query 距离近的 token 贡献了绝大部分注意力分数，真正需要远距离信息的位置只是少数（可交给少量全注意力层兜底）。滑动窗口的思路因此很直接：<b>每个 query 只能看它前面最近 W 个 token</b>，把复杂度从 O(seq²) 压到 <b>O(seq × W)</b>。</p>
+
+    <h4>② 核心思想：带状掩码（Band Mask）</h4>
+    <div class="eq">
+      <span class="c">// 因果掩码之上再加一层"窗口截断"：只允许 attend 到 [i−W, i] 区间</span><br>
+      mask[i][j] = −∞ &nbsp;若&nbsp; j &lt; i − W&nbsp;&nbsp;（窗口外全部屏蔽）<br>
+      <span class="c">// 效果：QK^T 矩阵只剩一条"带状"区域非 −∞</span><br>
+      &nbsp;&nbsp;j→  &nbsp;0&nbsp; 1&nbsp; 2&nbsp; 3&nbsp; 4&nbsp; 5&nbsp; 6&nbsp; 7<br>
+      i=4&nbsp;&nbsp;&nbsp;✗ ✗ ✗ ✗ ✓ ✓ ✓ ✗&nbsp;&nbsp;<span class="c">// ✓=attend（窗口 W=3 时只到 j=4..7 之外屏蔽…示意）</span><br>
+      <span class="c">// 滑动窗口 KV 缓存：只保留最近 W 个 KV，旧 token 直接被丢弃</span>
+    </div>
+
+    <h4>③ 源码对照（Dots1Attention）</h4>
+    <div class="codeblock"><span class="k">class</span> Dots1Attention:
+    <span class="c"># 层类型为 sliding_attention 时启用窗口，否则为 None（全注意力）</span>
+    self.sliding_window = config.sliding_window \
+        <span class="k">if</span> self.layer_type == <span class="s">"sliding_attention"</span> <span class="k">else</span> None
+
+    <span class="c"># forward 中把窗口传给注意力内核，由内核在 mask 里做截断</span>
+    attn_output, _ = attention_interface(
+        self, q, k, v, attention_mask,
+        sliding_window=self.sliding_window,   <span class="c"># ← 窗口生效处</span>
+        **kwargs)</div>
+    <p>Dots3-Note 的配置里 <code>sliding_window_size=513</code>，且它的滑动层使用<b>独立一套 swa_* MLA 参数</b>（swa_q_lora 1024、swa_kv_lora 1024、swa 头 64、θ=50000），说明滑动层与全注意力层是"两套可独立调参的 MLA"。DeepSeek-V4 的 sliding 层窗口为 128，其 <code>DeepseekV4HCACache</code> 继承自 <code>DynamicSlidingWindowLayer</code>——缓存本身就是滑动窗口结构，旧 KV 出窗口即释放。</p>
+
+    <h4>④ 混合使用：窗口层 + 全注意力层</h4>
+    <div class="fig">
+Dots3-Note 46 层：   F F S S S | F F S S S | ...   （每 5 层 2 个全 + 3 个滑动，窗口 513）
+DeepSeek-V4 43/61 层：S C C C ...（sliding 窗口 128 打底，CSA/HCA 压缩层负责远距离）
+Mistral 32 层：      F S S S S S S S | F S S ...   （每 8 层 1 个全注意力，窗口 4096）
+    </div>
+    <p>纯窗口注意力有一个已知弱点：信息<b>跨窗口无法传递</b>（第 100 个 token 看 513 窗口内的内容，窗口外的东西被完全屏蔽）。所以工业界从不单独使用滑动窗口，而是<b>周期性插入全注意力层</b>做"信息中继"——窗口层负责局部精细建模，全注意力层负责把远端信息搬进窗口。Dots3 是 5 层一循环、Mistral 是 8 层一循环，思路一致。</p>
+
+    <div class="proscons">
+      <div class="pc pro"><b>✅ 优点</b>① 计算/内存 O(seq×W) 近似线性，长序列友好；② 实现极简——只需在 mask 里加一条带状约束 + 窗口 KV 缓存；③ 局部建模能力强（N-gram 级精细上下文、位置敏感）；④ 与 MLA/压缩注意力正交，可自由叠加。</div>
+      <div class="pc con"><b>❌ 缺点</b>① 窗口外信息完全不可见，跨窗口长程依赖丢失；② 单独使用效果差，必须配全注意力/压缩层做中继；③ 窗口 W 是超参数，太小伤长程能力、太大失去省算意义；④ 训练与推理需保持同一窗口语义（chunk 边界处理要小心）。</div>
+    </div>
+  </div>
+
+  <!-- 8.5 四机制对比 -->
+  <div class="tut">
+    <h3>8.5 · 四机制横向对比</h3>
+    <div class="card" style="box-shadow:none;padding:0;border:0;">
+      <table>
+        <tr><th>维度</th><th>MLA 潜变量注意力</th><th>线性注意力（Gated DeltaNet）</th><th>压缩 + 索引稀疏注意力</th><th>滑动窗口注意力</th></tr>
+        <tr><td><b>核心思路</b></td><td>KV 低秩压缩后缓存，用时展开</td><td>固定大小状态 S 递推，不存 KV</td><td>压缩历史 + 索引器挑 top-k</td><td>只看最近 W 个 token</td></tr>
+        <tr><td><b>注意力形式</b></td><td>精确 softmax（无近似）</td><td>有损线性近似（Delta Rule 记忆）</td><td>精确 softmax，但只对 top-k 块</td><td>精确 softmax，但只对窗口内</td></tr>
+        <tr><td><b>KV 内存</b></td><td>O(seq × 576) 每层</td><td><b>O(1)</b> 恒定状态</td><td>O(seq/m) 压缩块（m=4~128）</td><td><b>O(W)</b> 只存窗口内 KV</td></tr>
+        <tr><td><b>计算复杂度</b></td><td>O(seq²)（省内存不省算）</td><td>O(seq × d²) 线性</td><td>O(seq × topk)</td><td><b>O(seq × W)</b> 近似线性</td></tr>
+        <tr><td><b>信息保真度</b></td><td>高（展开后与 MHA 等价）</td><td>中（有损，长程召回弱）</td><td>高（取决于索引器召回率）</td><td>局部高、<b>长程丢失</b>（需中继层）</td></tr>
+        <tr><td><b>实现复杂度</b></td><td>低（一套投影 + 展开）</td><td>中（短卷积 + 递推内核）</td><td>高（压缩器 + 索引器 + 多套 cache）</td><td><b>最低</b>（mask 带状约束 + 窗口缓存）</td></tr>
+        <tr><td><b>代表实现</b></td><td>DeepseekV3Attention、GlmMoeDsaAttention、KimiMLAAttention</td><td>Qwen3_5GatedDeltaNet、KimiDeltaAttention</td><td>DeepseekV4CSA/HCACompressor、GlmMoeDsaIndexer</td><td>Dots1Attention(sliding)、DeepseekV4Attention(sliding)</td></tr>
+        <tr><td><b>典型部署</b></td><td>全层（DSV3）</td><td>3/4 层 + 1/4 全注意力（Qwen/Kimi）</td><td>与 sliding 混合（DSV4）、每 4 层 1 full 索引（GLM）</td><td>窗口层+周期性全注意力中继（Dots3/Mistral）</td></tr>
+      </table>
+    </div>
+    <div class="note">💡 <b>一句话总结</b>：MLA 是"省内存不省算"、线性注意力是"全省但有损"、压缩索引是"精确但挑着看"、滑动窗口是"只看眼前"。四者并不互斥 —— GLM-5.2 是 <b>MLA + 索引</b> 叠加，Dots3 是 <b>MLA + 滑动窗口 + 索引</b> 的三合一（滑动层还自带独立 swa-MLA 参数），DeepSeek-V4 则是 <b>滑动 + CSA + HCA</b> 三型混合；它们共同构成了 2025-2026 年长上下文架构的四根支柱。</div>
+  </div>
+
+  <!-- ============ 9. 数据流与张量尺寸 ============ -->
+  <h2>九、各模型数据流与张量尺寸（输入 → 输出全链路）</h2>
+  <div class="sub">符号约定：B=batch，S=序列长度，H=hidden_size，V=vocab_size。所有模型均为 decoder-only，共用同一宏观骨架，差异集中在「Token Mixer」与「FFN/MoE」两步。</div>
+
+  <!-- 通用骨架 -->
+  <div class="tut">
+    <h3>9.0 · 通用宏观骨架（所有模型一致）</h3>
+    <p>每个 decoder-only 模型的输入输出骨架完全相同，只是 H / 层数 / 分词表不同：</p>
+    <div class="fig">
+输入 token_ids [B,S] ──► Embedding [B,S,H] ──► N × DecoderLayer [B,S,H] ──► FinalNorm [B,S,H] ──► LMHead [B,S,V] ──► logits [B,S,V]
+
+DecoderLayer 内部（PreNorm 残差结构）：
+  h [B,S,H]
+   │── input_layernorm (RMSNorm) ──► TokenMixer ──► + 残差 ──► h'
+   │── post_attention_layernorm ──► FFN / MoE ──► + 残差 ──► out [B,S,H]
+    </div>
+    <table>
+      <tr><th>步骤</th><th>模块</th><th>输入</th><th>输出</th><th>参数说明</th></tr>
+      <tr><td>1</td><td>Embedding（token_embedding）</td><td>[B,S] int64</td><td>[B,S,H]</td><td>V×H 查表（多数模型 tie_word_embeddings=false）</td></tr>
+      <tr><td>2</td><td>N × DecoderLayer</td><td>[B,S,H]</td><td>[B,S,H]</td><td>每个层内部：Norm→Mixer→残差→Norm→FFN→残差</td></tr>
+      <tr><td>3</td><td>Final RMSNorm</td><td>[B,S,H]</td><td>[B,S,H]</td><td>输出前最后一次归一化</td></tr>
+      <tr><td>4</td><td>LMHead（lm_head）</td><td>[B,S,H]</td><td>[B,S,V]</td><td>H→V 线性层，取最后 token 得 logits</td></tr>
+    </table>
+    <div class="note">💡 记忆口诀：<b>「查表 → 叠层 → 归一 → 投影」</b>。7 个模型 99% 的差异都发生在第 2 步的 DecoderLayer 里。</div>
+  </div>
+
+  <!-- 9.1 Qwen3.8-2.4T -->
+  <div class="tut">
+    <h3>9.1 · Qwen3.8-2.4T-A95B（Qwen3_5MoeForCausalLM）</h3>
+    <div class="en">H=8192 · 92 层 · V=248320 · 线性×3+全×1 循环</div>
+    <div class="fig">
+token_ids [B,S] ──► Emb [B,S,8192] ──► 92×DecoderLayer ──► Norm ──► LMHead [B,S,248320]
+                        └─ 每4层: 3×GatedDeltaNet + 1×MHA(64头×256, KV 4头)
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数</th></tr>
+      <tr><td colspan="4" style="background:#f0f3f8"><b>① Token Mixer（每层二选一）</b></td></tr>
+      <tr><td>GatedDeltaNet（线性）</td><td>[B,S,8192]</td><td>[B,S,8192]</td><td>in_proj_qkv: 8192→20480；key 16头×128、value 128头×128；conv1d k=4；out_proj 16384→8192</td></tr>
+      <tr><td>MHA（全注意力）</td><td>[B,S,8192]</td><td>[B,S,8192]</td><td>q_proj 8192→32768（含 gate 分流）；k/v_proj 8192→1024（KV 4头×256）；o_proj 16384→8192；q/k RMSNorm + partial RoPE 25%</td></tr>
+      <tr><td colspan="4" style="background:#f0f3f8"><b>② FFN（MoE，每层都有）</b></td></tr>
+      <tr><td>MoE 512 专家</td><td>[B,S,8192]</td><td>[B,S,8192]</td><td>router: 8192→512；每 token 激活 top-10；专家 gate_up 8192→4096、down 2048→8192；共享专家 + sigmoid 门控</td></tr>
+      <tr><td colspan="4" style="background:#f0f3f8"><b>③ 其他</b></td></tr>
+      <tr><td>MTP 预测头</td><td>[B,S,8192]</td><td>[B,S,248320]</td><td>1 层多 token 预测（可丢弃）</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.2 Qwen3.8-27B -->
+  <div class="tut">
+    <h3>9.2 · Qwen3.8-27B（Qwen3_5ForConditionalGeneration）</h3>
+    <div class="en">H=5120 · 64 层 · V=248320 · 稠密 FFN + 视觉塔</div>
+    <div class="fig">
+文本: token_ids [B,S] ──► Emb [B,S,5120] ──► 64×DecoderLayer ──► Norm ──► LMHead [B,S,248320]
+视觉: images [B,3,T,H,W] ──► ViT 27层 [B,Sv,1152] ──► PatchMerger ──► [B,Sv,5120]（拼进文本序列）
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数</th></tr>
+      <tr><td>GatedDeltaNet（线性）</td><td>[B,S,5120]</td><td>[B,S,5120]</td><td>in_proj_qkv: 5120→10240；key 16头×128、value 48头×128；conv1d k=4</td></tr>
+      <tr><td>MHA（全注意力）</td><td>[B,S,5120]</td><td>[B,S,5120]</td><td>q_proj 5120→12288（含 gate）；k/v 5120→1024（KV 4头×256）；o_proj 6144→5120</td></tr>
+      <tr><td>稠密 MLP</td><td>[B,S,5120]</td><td>[B,S,5120]</td><td>gate/up 5120→17408（SwiGLU）、down 17408→5120</td></tr>
+      <tr><td>视觉塔 ViT</td><td>[B,3,27×patch]</td><td>[B,Sv,5120]</td><td>27 层、hidden 1152、16 头、patch16+temporal2、spatial_merge 2、out_hidden 5120</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.3 Dots3 -->
+  <div class="tut">
+    <h3>9.3 · Dots3-Note（Dots3NoteForCausalLM）</h3>
+    <div class="en">H=5120 · 46 层 · V=152064 · MLA + 滑动窗口 + 索引器 + 多模态</div>
+    <div class="fig">
+文本: [B,S] ──► Emb [B,S,5120] ──► 46×DecoderLayer ──► Norm ──► LMHead [B,S,152064]
+                 └─ 每5层: 2×Full(MLA) + 3×Sliding(swa-MLA, 窗口513)
+视觉: ViT 42层 [B,Sv,5120] + 音频: Whisper [B,Sa,5120]（拼接后进入文本主干）
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数</th></tr>
+      <tr><td>MLA（全注意力）</td><td>[B,S,5120]</td><td>[B,S,5120]</td><td>q_a 5120→1024、q_b 1024→24576（128头×192）；kv_a 5120→576、kv_b 512→32768；o_proj 16384→5120</td></tr>
+      <tr><td>swa-MLA（滑动窗口）</td><td>[B,S,5120]</td><td>[B,S,5120]</td><td>独立参数集：swa_q_lora 1024、swa_kv_lora 1024、swa 头 64、窗口 513、θ=50000</td></tr>
+      <tr><td>索引器 Indexer</td><td>[B,S,5120]</td><td>[B,S,topk=2048]</td><td>64头×128维，top-2048 稀疏选键</td></tr>
+      <tr><td>MoE 256 专家</td><td>[B,S,5120]</td><td>[B,S,5120]</td><td>top-8 + 1 共享，moe_intermediate 1536；前 1 层稠密（intermediate 13824）</td></tr>
+      <tr><td>视觉/音频编码</td><td>图像/音频</td><td>[B,Sv/Sa,5120]</td><td>视觉 42 层 ViT patch14 + 金字塔 MoE；音频 Whisper encoder</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.4 DeepSeek-V3 -->
+  <div class="tut">
+    <h3>9.4 · DeepSeek-V3（DeepseekV3ForCausalLM）</h3>
+    <div class="en">H=7168 · 61 层 · V=129280 · 全层 MLA + 分组路由 MoE</div>
+    <div class="fig">
+[B,S] ──► Emb [B,S,7168] ──► 61×DecoderLayer ──► Norm ──► LMHead [B,S,129280]
+          └─ 每层: MLA(128头, q_lora1536/kv_lora512) + MoE(256专家 top-8, 8组选4)
+          └─ 前3层为稠密 MLP (intermediate 18432)；MTP 1层
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数</th></tr>
+      <tr><td>MLA</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>q_a 7168→1536、q_b 1536→24576（128头×192）；kv_a 7168→576（512+64）、kv_b 512→32768；o_proj 16384→7168</td></tr>
+      <tr><td>MoE 256 专家</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>top-8+1 共享；分组路由 n_group=8/topk_group=4（先选 4 组再选专家）；moe_intermediate 2048</td></tr>
+      <tr><td>MTP 预测头</td><td>[B,S,7168]</td><td>[B,S,129280]</td><td>1 层多 token 预测</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.5 DeepSeek-V4 -->
+  <div class="tut">
+    <h3>9.5 · DeepSeek-V4（DeepseekV4ForCausalLM，Pro/Flash）</h3>
+    <div class="en">Pro: H=7168/61层 · Flash: H=4096/43层 · V=129280 · 共享 KV + 压缩索引</div>
+    <div class="fig">
+[B,S] ──► Emb [B,S,H] ──► N×DecoderLayer ──► Norm ──► LMHead [B,S,129280]
+          └─ 层型: sliding(窗口128) / CSA(4:1压缩+索引) / HCA(128:1重度压缩) 按 compress_ratios 排布
+          └─ 每层: 共享KV MQA(kv头=1, K=V) + Hyper-Connection + MoE
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数（Pro）</th></tr>
+      <tr><td>共享 KV 注意力</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>q_a 7168→1536、q_b 1536→65536（128头×512）；kv_proj 7168→512（单头 K=V）；o_a 分组 65536→16384（o_groups=16）、o_b 16384→7168</td></tr>
+      <tr><td>HCA 压缩器</td><td>[B,S,7168]</td><td>[B,T',512]</td><td>每 128 token 压 1 块，softmax 门控加权，独立 θ=160k RoPE</td></tr>
+      <tr><td>CSA 压缩器+索引</td><td>[B,S,7168]</td><td>[B,T'',512]</td><td>每 4 token 压 1 块（Ca/Cb 双流重叠）；Indexer 64头×128 top-1024</td></tr>
+      <tr><td>MoE 384 专家</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>top-6+1 共享；moe_intermediate 3072；fp4 专家 + Hash Router</td></tr>
+      <tr><td>Hyper-Connection</td><td>[B,S,7168]×3</td><td>[B,S,7168]</td><td>3 条残差流交叉融合（深度残差）</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.6 Kimi-K3 -->
+  <div class="tut">
+    <h3>9.6 · Kimi-K3（KimiK3ForConditionalGeneration）</h3>
+    <div class="en">H=7168 · 93 层 · V=163840 · KDA 线性 ×66 + MLA ×24</div>
+    <div class="fig">
+[B,S] ──► Emb [B,S,7168] ──► 93×DecoderLayer ──► Norm ──► LMHead [B,S,163840]
+          └─ KDA层(66): DeltaRule 96头×128 + 短卷积k=4
+          └─ MLA层(24, 位于4,8,...,92,93): q_lora1536/kv_lora512, 96头
+          └─ MoE 896专家 top-16 + 2共享（分组topk）；前1层稠密(intermediate 33792)
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数</th></tr>
+      <tr><td>KDA（Delta Attention）</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>q/k/v_proj 7168→12288（96头×128）各自短卷积 k=4；chunk_kda 递推；FusedRMSNormGated 输出</td></tr>
+      <tr><td>MLA</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>q_a 7168→1536、q_b 1536→18432；kv_a 7168→576、kv_b 512→24576；o_proj 12288→7168；输出门控 g_proj</td></tr>
+      <tr><td>MoE 896 专家</td><td>[B,S,7168]</td><td>[B,S,7168]</td><td>top-16+2 共享（全球最大专家数）；moe_intermediate 3072；SiTU 激活</td></tr>
+      <tr><td>视觉塔</td><td>图像/视频</td><td>[B,Sv,7168]</td><td>MoonViT3d 27 层 + PatchMergerV2</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.7 GLM-5.2 -->
+  <div class="tut">
+    <h3>9.7 · GLM-5.2（GlmMoeDsaForCausalLM）</h3>
+    <div class="en">H=6144 · 78 层 · V=154880 · MLA + DSA 索引器（跨层共享 top-k）</div>
+    <div class="fig">
+[B,S] ──► Emb [B,S,6144] ──► 78×DecoderLayer ──► Norm ──► LMHead [B,S,154880]
+          └─ 每4层: 1×full 索引层(自算top-2048) + 3×shared 层(复用索引)
+          └─ 每层: MLA(64头, q_lora2048/kv_lora512) + MoE(256专家 top-8)
+          └─ 前3层稠密(intermediate 12288)；MTP 1层
+    </div>
+    <table>
+      <tr><th>模块</th><th>输入</th><th>输出</th><th>关键参数</th></tr>
+      <tr><td>MLA</td><td>[B,S,6144]</td><td>[B,S,6144]</td><td>q_a 6144→2048、q_b 2048→16384（64头×256）；kv_a 6144→576、kv_b 512→28672（nope192+v256）；o_proj 16384→6144</td></tr>
+      <tr><td>DSA 索引器</td><td>[B,S,6144]</td><td>[B,S,topk=2048]</td><td>32头×128维；wq_b 从 q_lora 取、wk 6144→128；interleaved RoPE；full/shared 跨层复用</td></tr>
+      <tr><td>MoE 256 专家</td><td>[B,S,6144]</td><td>[B,S,6144]</td><td>top-8+1 共享；moe_intermediate 2048；sigmoid 路由</td></tr>
+      <tr><td>MTP 预测头</td><td>[B,S,6144]</td><td>[B,S,154880]</td><td>1 层多 token 预测</td></tr>
+    </table>
+  </div>
+
+  <!-- 9.8 尺寸总表 -->
+  <div class="tut">
+    <h3>9.8 · 关键张量尺寸总表</h3>
+    <div class="card" style="box-shadow:none;padding:0;border:0;">
+      <table>
+        <tr><th>模型</th><th>H</th><th>层数</th><th>全注意力头×dim</th><th>线性/Mixer 头×dim</th><th>MLA 潜变量</th><th>MoE 专家/top</th><th>LMHead</th></tr>
+        <tr><td>Qwen3.8-2.4T</td><td>8192</td><td>92</td><td>64×256 (KV4)</td><td>K16/V128×128</td><td>—</td><td>512/10</td><td>248320</td></tr>
+        <tr><td>Qwen3.8-27B</td><td>5120</td><td>64</td><td>24×256 (KV4)</td><td>K16/V48×128</td><td>—</td><td>—（稠密 17408）</td><td>248320</td></tr>
+        <tr><td>Dots3-Note</td><td>5120</td><td>46</td><td>MLA 128×192</td><td>swa 64×256</td><td>q1024/kv512</td><td>256/8</td><td>152064</td></tr>
+        <tr><td>DeepSeek-V3</td><td>7168</td><td>61</td><td>MLA 128×192</td><td>—</td><td>q1536/kv512</td><td>256/8</td><td>129280</td></tr>
+        <tr><td>DeepSeek-V4</td><td>7168/4096</td><td>61/43</td><td>共享KV 128/64×512</td><td>Indexer 64×128</td><td>q1536/1024</td><td>384/6</td><td>129280</td></tr>
+        <tr><td>Kimi-K3</td><td>7168</td><td>93</td><td>MLA 96×192</td><td>KDA 96×128</td><td>q1536/kv512</td><td>896/16</td><td>163840</td></tr>
+        <tr><td>GLM-5.2</td><td>6144</td><td>78</td><td>MLA 64×256</td><td>Indexer 32×128</td><td>q2048/kv512</td><td>256/8</td><td>154880</td></tr>
+      </table>
+    </div>
+    <div class="note">💡 观察：① <b>MLA 潜变量统一 512</b> 是跨厂商共识；② Qwen/Kimi 的线性注意力 key 头都是 16、dim 128（key_dim=2048）；③ 除 Qwen3.8-27B 稠密版外全部 MoE；④ DeepSeek-V4 的 head_dim=512 是所有模型里最宽的。</div>
+  </div>
+
+  <div class="footer">报告基于 transformers 5.15.0 源码与本地 model_code 生成 · week16 大模型结构演进</div>
+</div>
+</body>
+</html>
