@@ -1,0 +1,47 @@
+{
+  "summary": {
+    "avg_parallel_s": 56.5,
+    "avg_serial_s": 95.44,
+    "avg_speedup": 3.01
+  },
+  "details": [
+    {
+      "question": "帮我做一个校园二手交易小程序的开发规划：需求分析、技术选型、架构设计、风险与测试",
+      "parallel": {
+        "wall": 57.7,
+        "n_subagents": 4,
+        "dispatch_wall": 19.23,
+        "serial_sum": 66.22,
+        "speedup": 3.44,
+        "dispatched": true
+      },
+      "serial": {
+        "wall": 117.0,
+        "n_subagents": 4,
+        "dispatch_wall": 75.56,
+        "serial_sum": 75.57,
+        "speedup": 1.0,
+        "dispatched": true
+      }
+    },
+    {
+      "question": "帮我做一个个人博客系统的开发规划：需求分析、技术选型、架构设计、上线与运维",
+      "parallel": {
+        "wall": 55.3,
+        "n_subagents": 4,
+        "dispatch_wall": 30.61,
+        "serial_sum": 78.93,
+        "speedup": 2.58,
+        "dispatched": true
+      },
+      "serial": {
+        "wall": 73.88,
+        "n_subagents": 4,
+        "dispatch_wall": 48.19,
+        "serial_sum": 48.19,
+        "speedup": 1.0,
+        "dispatched": true
+      }
+    }
+  ]
+}
